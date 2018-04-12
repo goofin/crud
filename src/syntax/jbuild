@@ -1,0 +1,13 @@
+(jbuild_version 1)
+
+(ocamllex (lexer))
+
+(rule
+ ((targets (parser.mli parser.ml))
+  (deps (parser.mly))
+  (action (ignore-stderr (run menhir --explain ${<})))))
+
+(executable (
+    (name test)
+    (libraries (core))
+))
