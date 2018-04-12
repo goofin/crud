@@ -1,14 +1,21 @@
-%token <string> IDENT
+%token COMMA
 %token LEFT_PAREN
 %token RIGHT_PAREN
-%token COMMA
+%token DOT
+%token QUESTION
+%token <string> COMPARISON
+
+%token <string> NUMBER
+%token <string> IDENT
+%token <string> QUOTED
+
 %token EOF
 
-%start <Syntax.tuple Syntax.value list> prog
+%start <Syntax.tuple Syntax.value> prog
 %%
 
 prog:
-    | elts = parse_inner_list; EOF { elts }
+    | elts = parse_tuple { elts }
     ;
 
 parse_tuple:
@@ -16,7 +23,7 @@ parse_tuple:
     ;
 
 parse_other:
-    | ident = IDENT { Syntax.Ident ident }
+    | ident = IDENT                                    { Syntax.Ident ident }
     | LEFT_PAREN; elts = parse_inner_list; RIGHT_PAREN { Syntax.List elts }
     ;
 
@@ -31,10 +38,12 @@ rev_nonempty_sep_list(DELIM, X):
   | xs = rev_nonempty_sep_list(DELIM, X); DELIM; x = X { x :: xs }
   ;
 
-%inline rev_sep_list(DELIM, X):
+%inline
+rev_sep_list(DELIM, X):
     | { [] }
     | xs = rev_nonempty_sep_list(DELIM, X) { xs }
     ;
 
-%inline sep_list(DELIM, X):
+%inline
+sep_list(DELIM, X):
   xs = rev_sep_list(DELIM, X) { List.rev xs }

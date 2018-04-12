@@ -1,9 +1,8 @@
 open Core
 
 let parse_and_print lexbuf =
-  List.iter ~f:(fun value ->
-      printf "%a\n" Syntax.output_tuple value;
-    ) (Parser.prog Lexer.read lexbuf)
+  let value = Parser.prog Lexer.read lexbuf in
+  printf "%a\n" Syntax.output_value value
 
 let loop filename () =
   let inx = In_channel.create filename in
