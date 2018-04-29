@@ -82,6 +82,20 @@ module Model = struct
   [@@deriving show]
 end
 
+module Create = struct
+  type model = string
+  [@@deriving show]
+
+  type entry =
+    | Raw
+    | Suffix of string
+  [@@deriving show]
+
+  type t = model * entry list
+  [@@deriving show]
+end
+
 type definition =
   | Model of Model.t
+  | Create of Create.t
 [@@deriving show]

@@ -47,6 +47,11 @@
 %token CASCADE
 %token RESTRICT
 
+// create
+%token CREATE
+%token RAW
+%token SUFFIX
+
 // some literals
 %token <string> NUMBER
 %token <string> IDENT
@@ -82,7 +87,8 @@ prog:
     ;
 
 parse_definition:
-    | model = parse_model { model }
+    | model  = parse_model { model }
+    | create = parse_create { create }
     ;
 
 parse_model:
@@ -226,4 +232,33 @@ parse_model_rel_attributes_attr:
     | COLUMN name = IDENT { Syntax.Model.Rel.Column name }
     | NULLABLE            { Syntax.Model.Rel.Nullable }
     | UPDATABLE           { Syntax.Model.Rel.Updatable }
+    ;
+
+parse_create:
+    CREATE
+    model = IDENT
+    entries = parse_create_entries
+    { Syntax.Create (model, entries) }
+    ;
+
+parse_create_entries:
+    LEFT_PAREN
+    entries = sep_list(COMMA, parse_create_entry)
+    RIGHT_PAREN
+    { entries }
+    ;
+
+parse_create_entry:
+    | raw    = parse_create_raw    { raw }
+    | suffix = parse_create_suffix { suffix }
+
+parse_create_raw:
+    RAW
+    { Syntax.Create.Raw }
+    ;
+
+parse_create_suffix:
+    SUFFIX
+    suffix = IDENT
+    { Syntax.Create.Suffix suffix }
     ;

@@ -91,3 +91,9 @@ model foo (
     field null_bool bool (nullable, updatable)
     field null_date date (nullable, updatable, autoupdate)
 )
+
+create foo (
+    raw
+
+    suffix "foo bar baz"
+)

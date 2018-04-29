@@ -106,6 +106,11 @@ rule token = parse
     | "cascade"  { needs_comma := true;  emit CASCADE }
     | "restrict" { needs_comma := true;  emit RESTRICT }
 
+    (* create *)
+    | "create" { needs_comma := true;  emit CREATE }
+    | "raw"    { needs_comma := true;  emit RAW }
+    | "suffix" { needs_comma := true;  emit SUFFIX }
+
     (* some literals *)
     | number  { needs_comma := true;  emit (NUMBER (Lexing.lexeme lexbuf)) }
     | ident   { needs_comma := true;  emit (IDENT  (Lexing.lexeme lexbuf)) }
@@ -113,10 +118,6 @@ rule token = parse
 
     (* keywords *)
     (*
-    | "create" { needs_comma := true;  emit CREATE }
-    | "raw"    { needs_comma := true;  emit RAW }
-    | "suffix" { needs_comma := true;  emit SUFFIX }
-
     | "read"
     | "count"
     | "has"
