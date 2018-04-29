@@ -1,6 +1,6 @@
 prog: COMMA UTIMESTAMP 
 ##
-## Ends in an error in state: 111.
+## Ends in an error in state: 112.
 ##
 ## prog -> option(COMMA) . EOF [ # ]
 ##
@@ -12,7 +12,7 @@ prog: COMMA UTIMESTAMP
 
 prog: MODEL IDENT LEFT_PAREN COMMA UTIMESTAMP 
 ##
-## Ends in an error in state: 100.
+## Ends in an error in state: 101.
 ##
 ## parse_model_entries -> LEFT_PAREN option(COMMA) . RIGHT_PAREN [ EOF COMMA ]
 ##
@@ -26,7 +26,7 @@ prog: MODEL IDENT LEFT_PAREN FIELD IDENT IDENT DOT IDENT SETNULL LEFT_PAREN COLU
 ##
 ## Ends in an error in state: 52.
 ##
-## parse_model_entry_rel_attributes_entry -> COLUMN . IDENT [ RIGHT_PAREN COMMA ]
+## parse_model_rel_attributes_attr -> COLUMN . IDENT [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## COLUMN 
@@ -38,7 +38,7 @@ prog: MODEL IDENT LEFT_PAREN FIELD IDENT IDENT DOT IDENT SETNULL LEFT_PAREN COMM
 ##
 ## Ends in an error in state: 60.
 ##
-## parse_model_entry_rel_attributes -> LEFT_PAREN option(COMMA) . RIGHT_PAREN [ RIGHT_PAREN COMMA ]
+## parse_model_rel_attributes -> LEFT_PAREN option(COMMA) . RIGHT_PAREN [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## LEFT_PAREN option(COMMA) 
@@ -51,10 +51,10 @@ prog: MODEL IDENT LEFT_PAREN FIELD IDENT IDENT DOT IDENT SETNULL LEFT_PAREN UPDA
 ## Ends in an error in state: 55.
 ##
 ## option(COMMA) -> COMMA . [ RIGHT_PAREN ]
-## rev_nonempty_sep_list(COMMA,parse_model_entry_rel_attributes_entry) -> rev_nonempty_sep_list(COMMA,parse_model_entry_rel_attributes_entry) COMMA . parse_model_entry_rel_attributes_entry [ RIGHT_PAREN COMMA ]
+## rev_nonempty_sep_list(COMMA,parse_model_rel_attributes_attr) -> rev_nonempty_sep_list(COMMA,parse_model_rel_attributes_attr) COMMA . parse_model_rel_attributes_attr [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
-## rev_nonempty_sep_list(COMMA,parse_model_entry_rel_attributes_entry) COMMA 
+## rev_nonempty_sep_list(COMMA,parse_model_rel_attributes_attr) COMMA 
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
@@ -63,11 +63,11 @@ prog: MODEL IDENT LEFT_PAREN FIELD IDENT IDENT DOT IDENT SETNULL LEFT_PAREN UPDA
 ##
 ## Ends in an error in state: 54.
 ##
-## parse_model_entry_rel_attributes -> LEFT_PAREN rev_nonempty_sep_list(COMMA,parse_model_entry_rel_attributes_entry) . option(COMMA) RIGHT_PAREN [ RIGHT_PAREN COMMA ]
-## rev_nonempty_sep_list(COMMA,parse_model_entry_rel_attributes_entry) -> rev_nonempty_sep_list(COMMA,parse_model_entry_rel_attributes_entry) . COMMA parse_model_entry_rel_attributes_entry [ RIGHT_PAREN COMMA ]
+## parse_model_rel_attributes -> LEFT_PAREN rev_nonempty_sep_list(COMMA,parse_model_rel_attributes_attr) . option(COMMA) RIGHT_PAREN [ RIGHT_PAREN COMMA ]
+## rev_nonempty_sep_list(COMMA,parse_model_rel_attributes_attr) -> rev_nonempty_sep_list(COMMA,parse_model_rel_attributes_attr) . COMMA parse_model_rel_attributes_attr [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
-## LEFT_PAREN rev_nonempty_sep_list(COMMA,parse_model_entry_rel_attributes_entry) 
+## LEFT_PAREN rev_nonempty_sep_list(COMMA,parse_model_rel_attributes_attr) 
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
@@ -76,8 +76,8 @@ prog: MODEL IDENT LEFT_PAREN FIELD IDENT IDENT DOT IDENT SETNULL LEFT_PAREN UTIM
 ##
 ## Ends in an error in state: 49.
 ##
-## parse_model_entry_rel_attributes -> LEFT_PAREN . option(COMMA) RIGHT_PAREN [ RIGHT_PAREN COMMA ]
-## parse_model_entry_rel_attributes -> LEFT_PAREN . rev_nonempty_sep_list(COMMA,parse_model_entry_rel_attributes_entry) option(COMMA) RIGHT_PAREN [ RIGHT_PAREN COMMA ]
+## parse_model_rel_attributes -> LEFT_PAREN . option(COMMA) RIGHT_PAREN [ RIGHT_PAREN COMMA ]
+## parse_model_rel_attributes -> LEFT_PAREN . rev_nonempty_sep_list(COMMA,parse_model_rel_attributes_attr) option(COMMA) RIGHT_PAREN [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## LEFT_PAREN 
@@ -89,10 +89,10 @@ prog: MODEL IDENT LEFT_PAREN FIELD IDENT IDENT DOT IDENT SETNULL UTIMESTAMP
 ##
 ## Ends in an error in state: 48.
 ##
-## parse_model_entry_rel -> FIELD IDENT IDENT DOT IDENT parse_model_entry_field_rel_kind . option(parse_model_entry_rel_attributes) [ RIGHT_PAREN COMMA ]
+## parse_model_rel -> FIELD IDENT IDENT DOT IDENT parse_model_rel_kind . option(parse_model_rel_attributes) [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
-## FIELD IDENT IDENT DOT IDENT parse_model_entry_field_rel_kind 
+## FIELD IDENT IDENT DOT IDENT parse_model_rel_kind 
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
@@ -101,7 +101,7 @@ prog: MODEL IDENT LEFT_PAREN FIELD IDENT IDENT DOT IDENT UTIMESTAMP
 ##
 ## Ends in an error in state: 44.
 ##
-## parse_model_entry_rel -> FIELD IDENT IDENT DOT IDENT . parse_model_entry_field_rel_kind option(parse_model_entry_rel_attributes) [ RIGHT_PAREN COMMA ]
+## parse_model_rel -> FIELD IDENT IDENT DOT IDENT . parse_model_rel_kind option(parse_model_rel_attributes) [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## FIELD IDENT IDENT DOT IDENT 
@@ -113,7 +113,7 @@ prog: MODEL IDENT LEFT_PAREN FIELD IDENT IDENT DOT UTIMESTAMP
 ##
 ## Ends in an error in state: 43.
 ##
-## parse_model_entry_rel -> FIELD IDENT IDENT DOT . IDENT parse_model_entry_field_rel_kind option(parse_model_entry_rel_attributes) [ RIGHT_PAREN COMMA ]
+## parse_model_rel -> FIELD IDENT IDENT DOT . IDENT parse_model_rel_kind option(parse_model_rel_attributes) [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## FIELD IDENT IDENT DOT 
@@ -125,7 +125,7 @@ prog: MODEL IDENT LEFT_PAREN FIELD IDENT IDENT UTIMESTAMP
 ##
 ## Ends in an error in state: 42.
 ##
-## parse_model_entry_rel -> FIELD IDENT IDENT . DOT IDENT parse_model_entry_field_rel_kind option(parse_model_entry_rel_attributes) [ RIGHT_PAREN COMMA ]
+## parse_model_rel -> FIELD IDENT IDENT . DOT IDENT parse_model_rel_kind option(parse_model_rel_attributes) [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## FIELD IDENT IDENT 
@@ -137,8 +137,8 @@ prog: MODEL IDENT LEFT_PAREN FIELD IDENT UPDATABLE
 ##
 ## Ends in an error in state: 32.
 ##
-## parse_model_entry_field -> FIELD IDENT . parse_model_entry_field_type option(parse_model_entry_field_attributes) [ RIGHT_PAREN COMMA ]
-## parse_model_entry_rel -> FIELD IDENT . IDENT DOT IDENT parse_model_entry_field_rel_kind option(parse_model_entry_rel_attributes) [ RIGHT_PAREN COMMA ]
+## parse_model_field -> FIELD IDENT . parse_model_field_type option(parse_model_field_attributes) [ RIGHT_PAREN COMMA ]
+## parse_model_rel -> FIELD IDENT . IDENT DOT IDENT parse_model_rel_kind option(parse_model_rel_attributes) [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## FIELD IDENT 
@@ -148,9 +148,9 @@ prog: MODEL IDENT LEFT_PAREN FIELD IDENT UPDATABLE
 
 prog: MODEL IDENT LEFT_PAREN FIELD IDENT UTIMESTAMP LEFT_PAREN COLUMN UTIMESTAMP 
 ##
-## Ends in an error in state: 74.
+## Ends in an error in state: 75.
 ##
-## parse_model_entry_field_attributes_entry -> COLUMN . IDENT [ RIGHT_PAREN COMMA ]
+## parse_model_field_attributes_attr -> COLUMN . IDENT [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## COLUMN 
@@ -160,9 +160,9 @@ prog: MODEL IDENT LEFT_PAREN FIELD IDENT UTIMESTAMP LEFT_PAREN COLUMN UTIMESTAMP
 
 prog: MODEL IDENT LEFT_PAREN FIELD IDENT UTIMESTAMP LEFT_PAREN COMMA UTIMESTAMP 
 ##
-## Ends in an error in state: 84.
+## Ends in an error in state: 85.
 ##
-## parse_model_entry_field_attributes -> LEFT_PAREN option(COMMA) . RIGHT_PAREN [ RIGHT_PAREN COMMA ]
+## parse_model_field_attributes -> LEFT_PAREN option(COMMA) . RIGHT_PAREN [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## LEFT_PAREN option(COMMA) 
@@ -172,9 +172,9 @@ prog: MODEL IDENT LEFT_PAREN FIELD IDENT UTIMESTAMP LEFT_PAREN COMMA UTIMESTAMP
 
 prog: MODEL IDENT LEFT_PAREN FIELD IDENT UTIMESTAMP LEFT_PAREN LENGTH UTIMESTAMP 
 ##
-## Ends in an error in state: 72.
+## Ends in an error in state: 73.
 ##
-## parse_model_entry_field_attributes_entry -> LENGTH . NUMBER [ RIGHT_PAREN COMMA ]
+## parse_model_field_attributes_attr -> LENGTH . NUMBER [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## LENGTH 
@@ -184,36 +184,36 @@ prog: MODEL IDENT LEFT_PAREN FIELD IDENT UTIMESTAMP LEFT_PAREN LENGTH UTIMESTAMP
 
 prog: MODEL IDENT LEFT_PAREN FIELD IDENT UTIMESTAMP LEFT_PAREN UPDATABLE COMMA UTIMESTAMP 
 ##
-## Ends in an error in state: 79.
+## Ends in an error in state: 80.
 ##
 ## option(COMMA) -> COMMA . [ RIGHT_PAREN ]
-## rev_nonempty_sep_list(COMMA,parse_model_entry_field_attributes_entry) -> rev_nonempty_sep_list(COMMA,parse_model_entry_field_attributes_entry) COMMA . parse_model_entry_field_attributes_entry [ RIGHT_PAREN COMMA ]
+## rev_nonempty_sep_list(COMMA,parse_model_field_attributes_attr) -> rev_nonempty_sep_list(COMMA,parse_model_field_attributes_attr) COMMA . parse_model_field_attributes_attr [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
-## rev_nonempty_sep_list(COMMA,parse_model_entry_field_attributes_entry) COMMA 
+## rev_nonempty_sep_list(COMMA,parse_model_field_attributes_attr) COMMA 
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 prog: MODEL IDENT LEFT_PAREN FIELD IDENT UTIMESTAMP LEFT_PAREN UPDATABLE UTIMESTAMP 
 ##
-## Ends in an error in state: 78.
+## Ends in an error in state: 79.
 ##
-## parse_model_entry_field_attributes -> LEFT_PAREN rev_nonempty_sep_list(COMMA,parse_model_entry_field_attributes_entry) . option(COMMA) RIGHT_PAREN [ RIGHT_PAREN COMMA ]
-## rev_nonempty_sep_list(COMMA,parse_model_entry_field_attributes_entry) -> rev_nonempty_sep_list(COMMA,parse_model_entry_field_attributes_entry) . COMMA parse_model_entry_field_attributes_entry [ RIGHT_PAREN COMMA ]
+## parse_model_field_attributes -> LEFT_PAREN rev_nonempty_sep_list(COMMA,parse_model_field_attributes_attr) . option(COMMA) RIGHT_PAREN [ RIGHT_PAREN COMMA ]
+## rev_nonempty_sep_list(COMMA,parse_model_field_attributes_attr) -> rev_nonempty_sep_list(COMMA,parse_model_field_attributes_attr) . COMMA parse_model_field_attributes_attr [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
-## LEFT_PAREN rev_nonempty_sep_list(COMMA,parse_model_entry_field_attributes_entry) 
+## LEFT_PAREN rev_nonempty_sep_list(COMMA,parse_model_field_attributes_attr) 
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
 
 prog: MODEL IDENT LEFT_PAREN FIELD IDENT UTIMESTAMP LEFT_PAREN UTIMESTAMP 
 ##
-## Ends in an error in state: 69.
+## Ends in an error in state: 70.
 ##
-## parse_model_entry_field_attributes -> LEFT_PAREN . option(COMMA) RIGHT_PAREN [ RIGHT_PAREN COMMA ]
-## parse_model_entry_field_attributes -> LEFT_PAREN . rev_nonempty_sep_list(COMMA,parse_model_entry_field_attributes_entry) option(COMMA) RIGHT_PAREN [ RIGHT_PAREN COMMA ]
+## parse_model_field_attributes -> LEFT_PAREN . option(COMMA) RIGHT_PAREN [ RIGHT_PAREN COMMA ]
+## parse_model_field_attributes -> LEFT_PAREN . rev_nonempty_sep_list(COMMA,parse_model_field_attributes_attr) option(COMMA) RIGHT_PAREN [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## LEFT_PAREN 
@@ -223,12 +223,12 @@ prog: MODEL IDENT LEFT_PAREN FIELD IDENT UTIMESTAMP LEFT_PAREN UTIMESTAMP
 
 prog: MODEL IDENT LEFT_PAREN FIELD IDENT UTIMESTAMP UTIMESTAMP 
 ##
-## Ends in an error in state: 68.
+## Ends in an error in state: 69.
 ##
-## parse_model_entry_field -> FIELD IDENT parse_model_entry_field_type . option(parse_model_entry_field_attributes) [ RIGHT_PAREN COMMA ]
+## parse_model_field -> FIELD IDENT parse_model_field_type . option(parse_model_field_attributes) [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
-## FIELD IDENT parse_model_entry_field_type 
+## FIELD IDENT parse_model_field_type 
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
@@ -237,8 +237,8 @@ prog: MODEL IDENT LEFT_PAREN FIELD UTIMESTAMP
 ##
 ## Ends in an error in state: 31.
 ##
-## parse_model_entry_field -> FIELD . IDENT parse_model_entry_field_type option(parse_model_entry_field_attributes) [ RIGHT_PAREN COMMA ]
-## parse_model_entry_rel -> FIELD . IDENT IDENT DOT IDENT parse_model_entry_field_rel_kind option(parse_model_entry_rel_attributes) [ RIGHT_PAREN COMMA ]
+## parse_model_field -> FIELD . IDENT parse_model_field_type option(parse_model_field_attributes) [ RIGHT_PAREN COMMA ]
+## parse_model_rel -> FIELD . IDENT IDENT DOT IDENT parse_model_rel_kind option(parse_model_rel_attributes) [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## FIELD 
@@ -250,7 +250,7 @@ prog: MODEL IDENT LEFT_PAREN INDEX LEFT_PAREN COMMA UTIMESTAMP
 ##
 ## Ends in an error in state: 29.
 ##
-## parse_model_entry_index -> INDEX LEFT_PAREN option(COMMA) . RIGHT_PAREN [ RIGHT_PAREN COMMA ]
+## parse_model_index -> INDEX LEFT_PAREN option(COMMA) . RIGHT_PAREN [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## INDEX LEFT_PAREN option(COMMA) 
@@ -262,7 +262,7 @@ prog: MODEL IDENT LEFT_PAREN INDEX LEFT_PAREN FIELDS UTIMESTAMP
 ##
 ## Ends in an error in state: 17.
 ##
-## parse_model_entry_index_entry_fields -> FIELDS . list(IDENT) [ RIGHT_PAREN COMMA ]
+## parse_model_index_fields -> FIELDS . list(IDENT) [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## FIELDS 
@@ -274,7 +274,7 @@ prog: MODEL IDENT LEFT_PAREN INDEX LEFT_PAREN NAME UTIMESTAMP
 ##
 ## Ends in an error in state: 15.
 ##
-## parse_model_entry_index_entry_name -> NAME . IDENT [ RIGHT_PAREN COMMA ]
+## parse_model_index_name -> NAME . IDENT [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## NAME 
@@ -287,10 +287,10 @@ prog: MODEL IDENT LEFT_PAREN INDEX LEFT_PAREN UNIQUE COMMA UTIMESTAMP
 ## Ends in an error in state: 21.
 ##
 ## option(COMMA) -> COMMA . [ RIGHT_PAREN ]
-## rev_nonempty_sep_list(COMMA,parse_model_entry_index_entry) -> rev_nonempty_sep_list(COMMA,parse_model_entry_index_entry) COMMA . parse_model_entry_index_entry [ RIGHT_PAREN COMMA ]
+## rev_nonempty_sep_list(COMMA,parse_model_index_entry) -> rev_nonempty_sep_list(COMMA,parse_model_index_entry) COMMA . parse_model_index_entry [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
-## rev_nonempty_sep_list(COMMA,parse_model_entry_index_entry) COMMA 
+## rev_nonempty_sep_list(COMMA,parse_model_index_entry) COMMA 
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
@@ -299,11 +299,11 @@ prog: MODEL IDENT LEFT_PAREN INDEX LEFT_PAREN UNIQUE UTIMESTAMP
 ##
 ## Ends in an error in state: 20.
 ##
-## parse_model_entry_index -> INDEX LEFT_PAREN rev_nonempty_sep_list(COMMA,parse_model_entry_index_entry) . option(COMMA) RIGHT_PAREN [ RIGHT_PAREN COMMA ]
-## rev_nonempty_sep_list(COMMA,parse_model_entry_index_entry) -> rev_nonempty_sep_list(COMMA,parse_model_entry_index_entry) . COMMA parse_model_entry_index_entry [ RIGHT_PAREN COMMA ]
+## parse_model_index -> INDEX LEFT_PAREN rev_nonempty_sep_list(COMMA,parse_model_index_entry) . option(COMMA) RIGHT_PAREN [ RIGHT_PAREN COMMA ]
+## rev_nonempty_sep_list(COMMA,parse_model_index_entry) -> rev_nonempty_sep_list(COMMA,parse_model_index_entry) . COMMA parse_model_index_entry [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
-## INDEX LEFT_PAREN rev_nonempty_sep_list(COMMA,parse_model_entry_index_entry) 
+## INDEX LEFT_PAREN rev_nonempty_sep_list(COMMA,parse_model_index_entry) 
 ##
 
 <YOUR SYNTAX ERROR MESSAGE HERE>
@@ -312,8 +312,8 @@ prog: MODEL IDENT LEFT_PAREN INDEX LEFT_PAREN UTIMESTAMP
 ##
 ## Ends in an error in state: 13.
 ##
-## parse_model_entry_index -> INDEX LEFT_PAREN . option(COMMA) RIGHT_PAREN [ RIGHT_PAREN COMMA ]
-## parse_model_entry_index -> INDEX LEFT_PAREN . rev_nonempty_sep_list(COMMA,parse_model_entry_index_entry) option(COMMA) RIGHT_PAREN [ RIGHT_PAREN COMMA ]
+## parse_model_index -> INDEX LEFT_PAREN . option(COMMA) RIGHT_PAREN [ RIGHT_PAREN COMMA ]
+## parse_model_index -> INDEX LEFT_PAREN . rev_nonempty_sep_list(COMMA,parse_model_index_entry) option(COMMA) RIGHT_PAREN [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## INDEX LEFT_PAREN 
@@ -325,8 +325,8 @@ prog: MODEL IDENT LEFT_PAREN INDEX UTIMESTAMP
 ##
 ## Ends in an error in state: 12.
 ##
-## parse_model_entry_index -> INDEX . LEFT_PAREN option(COMMA) RIGHT_PAREN [ RIGHT_PAREN COMMA ]
-## parse_model_entry_index -> INDEX . LEFT_PAREN rev_nonempty_sep_list(COMMA,parse_model_entry_index_entry) option(COMMA) RIGHT_PAREN [ RIGHT_PAREN COMMA ]
+## parse_model_index -> INDEX . LEFT_PAREN option(COMMA) RIGHT_PAREN [ RIGHT_PAREN COMMA ]
+## parse_model_index -> INDEX . LEFT_PAREN rev_nonempty_sep_list(COMMA,parse_model_index_entry) option(COMMA) RIGHT_PAREN [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## INDEX 
@@ -338,7 +338,7 @@ prog: MODEL IDENT LEFT_PAREN KEY UTIMESTAMP
 ##
 ## Ends in an error in state: 10.
 ##
-## parse_model_entry_key -> KEY . list(IDENT) [ RIGHT_PAREN COMMA ]
+## parse_model_key -> KEY . list(IDENT) [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## KEY 
@@ -348,7 +348,7 @@ prog: MODEL IDENT LEFT_PAREN KEY UTIMESTAMP
 
 prog: MODEL IDENT LEFT_PAREN RIGHT_PAREN COMMA UTIMESTAMP 
 ##
-## Ends in an error in state: 104.
+## Ends in an error in state: 105.
 ##
 ## option(COMMA) -> COMMA . [ EOF ]
 ## rev_nonempty_sep_list(COMMA,parse_definition) -> rev_nonempty_sep_list(COMMA,parse_definition) COMMA . parse_definition [ EOF COMMA ]
@@ -361,7 +361,7 @@ prog: MODEL IDENT LEFT_PAREN RIGHT_PAREN COMMA UTIMESTAMP
 
 prog: MODEL IDENT LEFT_PAREN RIGHT_PAREN UTIMESTAMP 
 ##
-## Ends in an error in state: 103.
+## Ends in an error in state: 104.
 ##
 ## prog -> rev_nonempty_sep_list(COMMA,parse_definition) . option(COMMA) EOF [ # ]
 ## rev_nonempty_sep_list(COMMA,parse_definition) -> rev_nonempty_sep_list(COMMA,parse_definition) . COMMA parse_definition [ EOF COMMA ]
@@ -374,7 +374,7 @@ prog: MODEL IDENT LEFT_PAREN RIGHT_PAREN UTIMESTAMP
 
 prog: MODEL IDENT LEFT_PAREN TABLE IDENT UTIMESTAMP 
 ##
-## Ends in an error in state: 88.
+## Ends in an error in state: 89.
 ##
 ## parse_model_entries -> LEFT_PAREN rev_nonempty_sep_list(COMMA,parse_model_entry) . option(COMMA) RIGHT_PAREN [ EOF COMMA ]
 ## rev_nonempty_sep_list(COMMA,parse_model_entry) -> rev_nonempty_sep_list(COMMA,parse_model_entry) . COMMA parse_model_entry [ RIGHT_PAREN COMMA ]
@@ -389,7 +389,7 @@ prog: MODEL IDENT LEFT_PAREN TABLE UTIMESTAMP
 ##
 ## Ends in an error in state: 8.
 ##
-## parse_model_entry_table -> TABLE . IDENT [ RIGHT_PAREN COMMA ]
+## parse_model_table -> TABLE . IDENT [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## TABLE 
@@ -399,7 +399,7 @@ prog: MODEL IDENT LEFT_PAREN TABLE UTIMESTAMP
 
 prog: MODEL IDENT LEFT_PAREN UNIQUE COMMA UTIMESTAMP 
 ##
-## Ends in an error in state: 89.
+## Ends in an error in state: 90.
 ##
 ## option(COMMA) -> COMMA . [ RIGHT_PAREN ]
 ## rev_nonempty_sep_list(COMMA,parse_model_entry) -> rev_nonempty_sep_list(COMMA,parse_model_entry) COMMA . parse_model_entry [ RIGHT_PAREN COMMA ]
@@ -426,7 +426,7 @@ prog: MODEL IDENT LEFT_PAREN UNIQUE UTIMESTAMP
 ##
 ## Ends in an error in state: 4.
 ##
-## parse_model_entry_unique -> UNIQUE . list(IDENT) [ RIGHT_PAREN COMMA ]
+## parse_model_unique -> UNIQUE . list(IDENT) [ RIGHT_PAREN COMMA ]
 ##
 ## The known suffix of the stack is as follows:
 ## UNIQUE 

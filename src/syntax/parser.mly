@@ -100,72 +100,72 @@ parse_model_entries:
     ;
 
 parse_model_entry:
-    | table  = parse_model_entry_table  { table }
-    | key    = parse_model_entry_key    { key }
-    | unique = parse_model_entry_unique { unique }
-    | index  = parse_model_entry_index  { index }
-    | field  = parse_model_entry_field  { field }
-    | rel    = parse_model_entry_rel    { rel }
+    | table  = parse_model_table  { table }
+    | key    = parse_model_key    { key }
+    | unique = parse_model_unique { unique }
+    | index  = parse_model_index  { index }
+    | field  = parse_model_field  { field }
+    | rel    = parse_model_rel    { rel }
     ;
 
-parse_model_entry_table:
+parse_model_table:
     TABLE
     name = IDENT
     { Syntax.Model.Table name }
     ;
 
-parse_model_entry_key:
+parse_model_key:
     KEY
     fields = list(IDENT)
     { Syntax.Model.Key fields }
     ;
 
-parse_model_entry_unique:
+parse_model_unique:
     UNIQUE
     fields = list(IDENT)
     { Syntax.Model.Unique fields }
     ;
 
-parse_model_entry_index:
+parse_model_index:
     INDEX
     LEFT_PAREN
-    entries = sep_list(COMMA, parse_model_entry_index_entry)
+    entries = sep_list(COMMA, parse_model_index_entry)
     RIGHT_PAREN
     { Syntax.Model.Index entries }
     ;
 
-parse_model_entry_index_entry:
-    | name   = parse_model_entry_index_entry_name   { name }
-    | fields = parse_model_entry_index_entry_fields { fields }
-    | unique = parse_model_entry_index_entry_unique { unique }
+parse_model_index_entry:
+    | name   = parse_model_index_name   { name }
+    | fields = parse_model_index_fields { fields }
+    | unique = parse_model_index_unique { unique }
     ;
 
-parse_model_entry_index_entry_name:
+parse_model_index_name:
     NAME
     name = IDENT
     { Syntax.Model.Index.Name name }
     ;
 
-parse_model_entry_index_entry_fields:
+parse_model_index_fields:
     FIELDS
     fields = list(IDENT)
     { Syntax.Model.Index.Fields fields }
     ;
 
-parse_model_entry_index_entry_unique:
+parse_model_index_unique:
     UNIQUE
     { Syntax.Model.Index.Unique }
     ;
 
-parse_model_entry_field:
+parse_model_field:
     FIELD
     name = IDENT
-    typ = parse_model_entry_field_type
-    attrs = option(parse_model_entry_field_attributes)
+    typ = parse_model_field_type
+    attrs = option(parse_model_field_attributes)
     { Syntax.Model.Field (name, typ, attrs) }
     ;
 
-parse_model_entry_field_type:
+parse_model_field_type:
     | SERIAL     { Syntax.Model.Field.Serial }
     | SERIAL64   { Syntax.Model.Field.Serial64 }
     | INT        { Syntax.Model.Field.Int }
@@ -182,14 +182,14 @@ parse_model_entry_field_type:
     | BLOB       { Syntax.Model.Field.Blob }
     ;
 
-parse_model_entry_field_attributes:
+parse_model_field_attributes:
     LEFT_PAREN
-    attrs = sep_list(COMMA, parse_model_entry_field_attributes_entry)
+    attrs = sep_list(COMMA, parse_model_field_attributes_attr)
     RIGHT_PAREN
     { attrs }
     ;
 
-parse_model_entry_field_attributes_entry:
+parse_model_field_attributes_attr:
     | COLUMN name = IDENT    { Syntax.Model.Field.Column name }
     | NULLABLE               { Syntax.Model.Field.Nullable }
     | UPDATABLE              { Syntax.Model.Field.Updatable }
@@ -198,31 +198,31 @@ parse_model_entry_field_attributes_entry:
     | LENGTH length = NUMBER { Syntax.Model.Field.Length length }
     ;
 
-parse_model_entry_rel:
+parse_model_rel:
     FIELD
     name = IDENT
     model = IDENT
     DOT
     field = IDENT
-    kind = parse_model_entry_field_rel_kind
-    attrs = option(parse_model_entry_rel_attributes)
+    kind = parse_model_rel_kind
+    attrs = option(parse_model_rel_attributes)
     { Syntax.Model.Rel (name, model, field, kind, attrs) }
     ;
 
-parse_model_entry_field_rel_kind:
+parse_model_rel_kind:
     | SETNULL  { Syntax.Model.Rel.Setnull }
     | CASCADE  { Syntax.Model.Rel.Cascade }
     | RESTRICT { Syntax.Model.Rel.Restrict }
     ;
 
-parse_model_entry_rel_attributes:
+parse_model_rel_attributes:
     LEFT_PAREN
-    attrs = sep_list(COMMA, parse_model_entry_rel_attributes_entry);
+    attrs = sep_list(COMMA, parse_model_rel_attributes_attr);
     RIGHT_PAREN
     { attrs }
     ;
 
-parse_model_entry_rel_attributes_entry:
+parse_model_rel_attributes_attr:
     | COLUMN name = IDENT { Syntax.Model.Rel.Column name }
     | NULLABLE            { Syntax.Model.Rel.Nullable }
     | UPDATABLE           { Syntax.Model.Rel.Updatable }
