@@ -1,13 +1,8 @@
 open Core
 
-let parse_and_print lexbuf =
-  let value = Parser.prog Lexer.read lexbuf in
-  printf "%a\n" Syntax.output_value value
-
 let loop filename () =
-  let inx = In_channel.create filename in
-  parse_and_print (Lexing.from_channel inx);
-  In_channel.close inx
+  List.iter (Parse.parse_file Parse.prog filename)
+    ~f:(fun def -> printf "%s\n" (Syntax.show_definition def))
 
 let () =
   Command.basic_spec ~summary:"Test"

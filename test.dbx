@@ -1,0 +1,93 @@
+model a (
+    key    pk
+    unique id
+    unique "name"
+    index  (
+        fields ctime mtime
+        unique
+    )
+
+    field pk     serial64
+    field ctime  timestamp ( autoinsert )
+    field mtime  timestamp ( autoinsert, autoupdate )
+    field id     text
+    field "name" text
+)
+
+model b (
+    key    pk
+    unique id
+
+    field pk   serial64
+    field id   text
+    field data text     ( updatable )
+)
+
+model c (
+    key    pk
+    unique id
+
+    field pk   serial64
+    field id   text
+    field b_pk b.pk     cascade
+)
+
+model d (
+    key    pk
+    unique id
+    unique a_id alias
+
+    field pk     serial64
+    field id     text
+    field alias  text            ( nullable, updatable )
+    field "date" timestamp       ( autoinsert )
+    field e_id   e.id     restrict
+    field a_id   a.id     cascade
+)
+
+model a_b (
+    key   b_pk a_pk
+    field b_pk b.pk cascade
+    field a_pk a.pk cascade
+)
+
+
+model e (
+    key    pk
+    unique id
+
+    field pk   serial64
+    field id   text
+    field a_id a.id     cascade
+)
+
+model foo (
+    key id
+
+    field id serial64
+    field "int" int (updatable)
+    field "int64" int64 (updatable)
+    field "uint" uint (updatable)
+    field "uint64" uint64 (updatable)
+    field "float" float (updatable)
+    field "float64" float64 (updatable)
+    field "string" text (updatable)
+    field "blob" blob (updatable)
+    field "timestamp" timestamp (updatable, autoinsert)
+    field "utimestamp" utimestamp (updatable, autoinsert, autoupdate)
+    field "bool" bool (updatable)
+    field "date" date (updatable)
+
+    field null_int int (nullable, updatable)
+    field null_int64 int64 (nullable, updatable)
+    field null_uint uint (nullable, updatable)
+    field null_uint64 uint64 (nullable, updatable)
+    field null_float float (nullable, updatable)
+    field null_float64 float64 (nullable, updatable)
+    field null_string text (nullable, updatable)
+    field null_blob blob (nullable, updatable)
+    field null_timestamp timestamp (nullable, updatable)
+    field null_utimestamp utimestamp (nullable, updatable)
+    field null_bool bool (nullable, updatable)
+    field null_date date (nullable, updatable, autoupdate)
+)

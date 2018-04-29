@@ -2,12 +2,25 @@
 
 (ocamllex (lexer))
 
-(rule
- ((targets (parser.mli parser.ml))
-  (deps (parser.mly))
-  (action (ignore-stderr (run menhir --explain ${<})))))
+(rule (
+    (targets (parser_messages.ml))
+    (deps (parser.messages parser.mly))
+    (action
+        (with-stdout-to parser.messages
+            (run menhir --unused-tokens --update-errors parser.messages parser.mly)))
+    (action
+        (with-stdout-to parser_messages.ml
+            (run menhir --unused-tokens --compile-errors parser.messages parser.mly)))
+))
+
+(rule (
+    (targets (parser.mli parser.ml))
+    (deps (parser.mly))
+    (action (run menhir --unused-tokens --table --explain ${<}))
+))
 
 (executable (
     (name test)
-    (libraries (core))
+    (libraries (core menhirLib ppx_deriving))
+    (preprocess (pps (ppx_deriving.show)))
 ))

@@ -1,33 +1,87 @@
 open Core
-open Out_channel
 
-type tuple
-type other
+module Model = struct
+  module Index = struct
+    type entry =
+      | Name of string
+      | Fields of string list
+      | Unique
+    [@@deriving show]
 
-type 'a value =
-  | Ident : string           -> other value
-  | List  : tuple value list -> other value
-  | Tuple : other value list -> tuple value
+    type t = entry list
+    [@@deriving show]
+  end
 
-let output_joined outc delim fn values =
-  let last = List.length values - 1 in
-  List.iteri ~f:(fun i value ->
-    fn outc value;
-    if i <> last then output_string outc delim;
-  ) values
+  module Field = struct
+    type name = string [@@deriving show]
 
-let rec output_other outc = function
-  | Ident ident -> printf "%s" ident
-  | List tuples ->
-    output_string outc "(";
-    output_joined outc ", " output_tuple tuples;
-    output_string outc ")";
+    type type_ =
+      | Serial
+      | Serial64
+      | Int
+      | Int64
+      | Uint
+      | Uint64
+      | Bool
+      | Text
+      | Date
+      | Timestamp
+      | Utimestamp
+      | Float
+      | Float64
+      | Blob
+    [@@deriving show]
 
-and output_tuple outc (Tuple others) =
-  output_joined outc " " output_other others
+    type attr =
+      | Column of string
+      | Nullable
+      | Updatable
+      | Autoinsert
+      | Autoupdate
+      | Length of string
+    [@@deriving show]
 
-let output_value (type any) outc (value: any value) =
-  match value with
-  | Ident _ -> output_other outc value
-  | List _  -> output_other outc value
-  | Tuple _ -> output_tuple outc value
+    type t = name * type_ * attr list option
+    [@@deriving show]
+  end
+
+  module Rel = struct
+    type name = string [@@deriving show]
+    type model = string [@@deriving show]
+    type field = string [@@deriving show]
+
+    type kind =
+      | Setnull
+      | Cascade
+      | Restrict
+    [@@deriving show]
+
+    type attr =
+      | Column of string
+      | Nullable
+      | Updatable
+    [@@deriving show]
+
+    type t = name * model * field * kind * attr list option
+    [@@deriving show]
+  end
+
+  type name = string
+  [@@deriving show]
+
+  type entry =
+    | Table of string
+    | Key of string list
+    | Unique of string list
+    | Index of Index.t
+    | Field of Field.t
+    | Rel of Rel.t
+  [@@deriving show]
+
+  type t = name * entry list
+  [@@deriving show]
+end
+
+type definition =
+  | Model of Model.t
+[@@deriving show]
