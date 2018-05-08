@@ -2,21 +2,21 @@ open Core;
 
 module Model = {
   module Index = {
-    [@deriving show]
+    [@deriving sexp]
     type entry =
       | Name(string)
       | Fields(list(string))
       | Unique;
 
-    [@deriving show]
+    [@deriving sexp]
     type t = list(entry);
   };
 
   module Field = {
-    [@deriving show]
+    [@deriving sexp]
     type name = string;
 
-    [@deriving show]
+    [@deriving sexp]
     type type_ =
       | Serial
       | Serial64
@@ -33,7 +33,7 @@ module Model = {
       | Float64
       | Blob;
 
-    [@deriving show]
+    [@deriving sexp]
     type attr =
       | Column(string)
       | Nullable
@@ -42,40 +42,40 @@ module Model = {
       | Autoupdate
       | Length(string);
 
-    [@deriving show]
+    [@deriving sexp]
     type t = (name, type_, option(list(attr)));
   };
 
   module Rel = {
-    [@deriving show]
+    [@deriving sexp]
     type name = string;
 
-    [@deriving show]
+    [@deriving sexp]
     type model = string;
 
-    [@deriving show]
+    [@deriving sexp]
     type field = string;
 
-    [@deriving show]
+    [@deriving sexp]
     type kind =
       | Setnull
       | Cascade
       | Restrict;
 
-    [@deriving show]
+    [@deriving sexp]
     type attr =
       | Column(string)
       | Nullable
       | Updatable;
 
-    [@deriving show]
+    [@deriving sexp]
     type t = (name, model, field, kind, option(list(attr)));
   };
 
-  [@deriving show]
+  [@deriving sexp]
   type name = string;
 
-  [@deriving show]
+  [@deriving sexp]
   type entry =
     | Table(string)
     | Key(list(string))
@@ -84,24 +84,24 @@ module Model = {
     | Field(Field.t)
     | Rel(Rel.t);
 
-  [@deriving show]
+  [@deriving sexp]
   type t = (name, list(entry));
 };
 
 module Create = {
-  [@deriving show]
+  [@deriving sexp]
   type model = string;
 
-  [@deriving show]
+  [@deriving sexp]
   type entry =
     | Raw
     | Suffix(string);
 
-  [@deriving show]
+  [@deriving sexp]
   type t = (model, list(entry));
 };
 
-[@deriving show]
+[@deriving sexp]
 type definition =
   | Model(Model.t)
   | Create(Create.t);

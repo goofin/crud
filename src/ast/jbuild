@@ -23,5 +23,5 @@
     (name crud_ast)
     (synopsis "AST definition and parsing for crud")
     (libraries (core menhirLib ppx_deriving))
-    (preprocess (pps (ppx_deriving.show ppxlib.runner)))
+    (preprocess (pps (ppx_sexp_conv ppxlib.runner)))
 ))
