@@ -2,6 +2,8 @@
 %token COMMA
 %token LEFT_PAREN
 %token RIGHT_PAREN
+%token LEFT_BRACKET
+%token RIGHT_BRACKET
 %token DOT
 %token QUESTION
 %token <string> COMPARISON
@@ -34,7 +36,7 @@
 %token FLOAT64
 %token BLOB
 
-// field attributes
+// field attrs
 %token COLUMN
 %token NULLABLE
 %token UPDATABLE
@@ -47,10 +49,24 @@
 %token CASCADE
 %token RESTRICT
 
-// create
+// crud
+%token CRUD
 %token CREATE
-%token RAW
+%token READ
+%token UPDATE
+%token DELETE
+%token HAS
+%token FIRST
+%token ONE
+%token ALL
+%token FIND
+%token LIMITED
+%token PAGED
 %token SUFFIX
+%token RAW
+%token NORETURN
+%token AND
+%token OR
 
 // some literals
 %token <string> NUMBER
@@ -87,8 +103,8 @@ prog:
     ;
 
 parse_definition:
-    | model  = parse_model { model }
-    | create = parse_create { create }
+    | model = parse_model { model }
+    | crud  = parse_crud  { crud }
     ;
 
 parse_model:
@@ -167,7 +183,7 @@ parse_model_field:
     FIELD
     name = IDENT
     typ = parse_model_field_type
-    attrs = option(parse_model_field_attributes)
+    attrs = option(parse_model_field_attrs)
     { Syntax.Model.Field (name, typ, attrs) }
     ;
 
@@ -188,14 +204,14 @@ parse_model_field_type:
     | BLOB       { Syntax.Model.Field.Blob }
     ;
 
-parse_model_field_attributes:
+parse_model_field_attrs:
     LEFT_PAREN
-    attrs = sep_list(COMMA, parse_model_field_attributes_attr)
+    attrs = sep_list(COMMA, parse_model_field_attr)
     RIGHT_PAREN
     { attrs }
     ;
 
-parse_model_field_attributes_attr:
+parse_model_field_attr:
     | COLUMN name = IDENT    { Syntax.Model.Field.Column name }
     | NULLABLE               { Syntax.Model.Field.Nullable }
     | UPDATABLE              { Syntax.Model.Field.Updatable }
@@ -211,7 +227,7 @@ parse_model_rel:
     DOT
     field = IDENT
     kind = parse_model_rel_kind
-    attrs = option(parse_model_rel_attributes)
+    attrs = option(parse_model_rel_attrs)
     { Syntax.Model.Rel (name, model, field, kind, attrs) }
     ;
 
@@ -221,44 +237,151 @@ parse_model_rel_kind:
     | RESTRICT { Syntax.Model.Rel.Restrict }
     ;
 
-parse_model_rel_attributes:
+parse_model_rel_attrs:
     LEFT_PAREN
-    attrs = sep_list(COMMA, parse_model_rel_attributes_attr);
+    attrs = sep_list(COMMA, parse_model_rel_attr)
     RIGHT_PAREN
     { attrs }
     ;
 
-parse_model_rel_attributes_attr:
+parse_model_rel_attr:
     | COLUMN name = IDENT { Syntax.Model.Rel.Column name }
     | NULLABLE            { Syntax.Model.Rel.Nullable }
     | UPDATABLE           { Syntax.Model.Rel.Updatable }
     ;
 
-parse_create:
-    CREATE
-    model = IDENT
-    entries = parse_create_entries
-    { Syntax.Create (model, entries) }
+parse_crud:
+    CRUD
+    name = IDENT
+    entries = parse_crud_entries
+    { Syntax.Crud (name, entries) }
     ;
 
-parse_create_entries:
+parse_crud_entries:
     LEFT_PAREN
-    entries = sep_list(COMMA, parse_create_entry)
+    entries = sep_list(COMMA, parse_crud_entry)
     RIGHT_PAREN
     { entries }
     ;
 
-parse_create_entry:
-    | raw    = parse_create_raw    { raw }
-    | suffix = parse_create_suffix { suffix }
-
-parse_create_raw:
-    RAW
-    { Syntax.Create.Raw }
+parse_crud_entry:
+    | create = parse_crud_create { create }
+    | read   = parse_crud_read   { read }
+    | update = parse_crud_update { update }
+    | delete = parse_crud_delete { delete }
     ;
 
-parse_create_suffix:
-    SUFFIX
-    suffix = IDENT
-    { Syntax.Create.Suffix suffix }
+parse_crud_create:
+    CREATE
+    LEFT_PAREN
+    attrs = sep_list(COMMA, parse_crud_create_attr)
+    RIGHT_PAREN
+    { Syntax.Crud.Create attrs }
+    ;
+
+parse_crud_create_attr:
+    | RAW                   { Syntax.Crud.Create.Raw }
+    | SUFFIX suffix = IDENT { Syntax.Crud.Create.Suffix suffix }
+
+parse_crud_read:
+    READ
+    kind = parse_crud_read_kind
+    query = parse_crud_query
+    attrs = option(parse_crud_read_attrs)
+    { Syntax.Crud.Read (kind, query, attrs) }
+    ;
+
+parse_crud_read_kind:
+    | HAS     { Syntax.Crud.Read.Has }
+    | FIRST   { Syntax.Crud.Read.First }
+    | ONE     { Syntax.Crud.Read.One }
+    | ALL     { Syntax.Crud.Read.All }
+    | FIND    { Syntax.Crud.Read.Find }
+    | LIMITED { Syntax.Crud.Read.Limited }
+    | PAGED   { Syntax.Crud.Read.Paged }
+
+parse_crud_read_attrs:
+    LEFT_PAREN
+    attrs = sep_list(COMMA, parse_crud_read_attr)
+    RIGHT_PAREN
+    { attrs }
+    ;
+
+parse_crud_read_attr:
+    | SUFFIX suffix = IDENT { Syntax.Crud.Read.Suffix suffix }
+    ;    
+
+parse_crud_update:
+    UPDATE
+    query = parse_crud_query
+    attrs = option(parse_crud_update_attrs)
+    { Syntax.Crud.Update (query, attrs) }
+    ;
+
+parse_crud_update_attrs:
+    LEFT_PAREN
+    attrs = sep_list(COMMA, parse_crud_update_attr)
+    RIGHT_PAREN
+    { attrs }
+    ;
+
+parse_crud_update_attr:
+    | SUFFIX suffix = IDENT { Syntax.Crud.Update.Suffix suffix }
+    ;    
+
+parse_crud_delete:
+    DELETE
+    query = parse_crud_query
+    attrs = option(parse_crud_delete_attrs)
+    { Syntax.Crud.Delete (query, attrs) }
+    ;
+
+parse_crud_delete_attrs:
+    LEFT_PAREN
+    attrs = sep_list(COMMA, parse_crud_delete_attr)
+    RIGHT_PAREN
+    { attrs }
+    ;
+
+parse_crud_delete_attr:
+    | SUFFIX suffix = IDENT { Syntax.Crud.Delete.Suffix suffix }
+    ;    
+
+parse_crud_query:
+    LEFT_PAREN
+    clauses = sep_list(COMMA, parse_crud_query_clause)
+    RIGHT_PAREN
+    { clauses }
+    ;
+
+parse_crud_query_clause:
+    left = parse_crud_query_value
+    op = COMPARISON
+    right = parse_crud_query_value
+    { (left, op, right) }
+    ;
+
+parse_crud_query_value:
+    | QUESTION                           { Syntax.Crud.Query.Placeholder }
+    | field = IDENT                      { Syntax.Crud.Query.Field field }
+    | call = parse_crud_query_value_call { call }
+    | join = parse_crud_query_value_join { join }
+    ;
+
+parse_crud_query_value_call:
+    func = IDENT
+    LEFT_PAREN
+    arg = parse_crud_query_value
+    RIGHT_PAREN
+    { Syntax.Crud.Query.Call (func, arg) }
+    ;
+
+parse_crud_query_value_join:
+    model = IDENT
+    LEFT_BRACKET
+    query = parse_crud_query_clause
+    RIGHT_BRACKET
+    DOT
+    field = IDENT
+    { Syntax.Crud.Query.Join (model, query, field) }
     ;

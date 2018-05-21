@@ -55,6 +55,8 @@ rule token = parse
     | ','     { needs_comma := false; emit COMMA }
     | '('     { needs_comma := false; emit LEFT_PAREN }
     | ')'     { needs_comma := true;  emit RIGHT_PAREN }
+    | '['     { needs_comma := true;  emit LEFT_BRACKET }
+    | ']'     { needs_comma := true;  emit RIGHT_BRACKET }
     | '.'     { needs_comma := true;  emit DOT }
     | '?'     { needs_comma := true;  emit QUESTION }
     | "!="    { needs_comma := true;  emit (COMPARISON (Lexing.lexeme lexbuf)) }
@@ -106,32 +108,30 @@ rule token = parse
     | "cascade"  { needs_comma := true;  emit CASCADE }
     | "restrict" { needs_comma := true;  emit RESTRICT }
 
-    (* create *)
-    | "create" { needs_comma := true;  emit CREATE }
-    | "raw"    { needs_comma := true;  emit RAW }
-    | "suffix" { needs_comma := true;  emit SUFFIX }
+    (* crud *)
+    | "crud"     { needs_comma := true;  emit CRUD }
+    | "create"   { needs_comma := true;  emit CREATE }
+    | "read"     { needs_comma := true;  emit READ }
+    | "update"   { needs_comma := true;  emit UPDATE }
+    | "delete"   { needs_comma := true;  emit DELETE }
+    | "has"      { needs_comma := true;  emit HAS }
+    | "first"    { needs_comma := true;  emit FIRST }
+    | "one"      { needs_comma := true;  emit ONE }
+    | "all"      { needs_comma := true;  emit ALL }
+    | "find"     { needs_comma := true;  emit FIND }
+    | "limited"  { needs_comma := true;  emit LIMITED }
+    | "paged"    { needs_comma := true;  emit PAGED }
+    | "suffix"   { needs_comma := true;  emit SUFFIX }
+    | "raw"      { needs_comma := true;  emit RAW }
+    | "noreturn" { needs_comma := true;  emit NORETURN }
+    | "and"      { needs_comma := true;  emit AND }
+    | "or"       { needs_comma := true;  emit OR }
 
     (* some literals *)
     | number  { needs_comma := true;  emit (NUMBER (Lexing.lexeme lexbuf)) }
     | ident   { needs_comma := true;  emit (IDENT  (Lexing.lexeme lexbuf)) }
     | quoted  { needs_comma := true;  emit (IDENT  (unquote (Lexing.lexeme lexbuf))) }
 
-    (* keywords *)
-    (*
-    | "read"
-    | "count"
-    | "has"
-    | "first"
-    | "scalar"
-    | "one"
-    | "all"
-    | "limitoffset"
-    | "paged"
-
-    | "update"
-
-    | "delete"
-    *)
-
+    (* eof *)
     | eof     { EOF }
     | _       { lexing_error lexbuf }

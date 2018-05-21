@@ -92,8 +92,9 @@ model foo (
     field null_date date (nullable, updatable, autoupdate)
 )
 
-create foo (
-    raw
-
-    suffix "foo bar baz"
+crud foo (
+    read all (
+        foo = bar[id = ?].baz
+        bif = bar
+    )
 )

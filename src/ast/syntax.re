@@ -88,14 +88,76 @@ module Model = {
   type t = (name, list(entry));
 };
 
-module Create = {
+module Crud = {
+  module Query = {
+    [@deriving sexp]
+    type value =
+      | Placeholder
+      | Field(string)
+      | Literal(string)
+      | Call(string, value)
+      | Join(string, t, string)
+
+    [@deriving sexp]
+    and t = (value, string, value);
+  };
+
+  module Create = {
+    [@deriving sexp]
+    type entry =
+      | Raw
+      | Suffix(string);
+
+    [@deriving sexp]
+    type t = list(entry);
+  };
+
+  module Read = {
+    [@deriving sexp]
+    type kind =
+      | Has
+      | First
+      | One
+      | All
+      | Find
+      | Limited
+      | Paged;
+
+    [@deriving sexp]
+    type attr =
+      | Suffix(string);
+
+    [@deriving sexp]
+    type t = (kind, list(Query.t), option(list(attr)));
+  };
+
+  module Update = {
+    [@deriving sexp]
+    type attr =
+      | Suffix(string);
+
+    [@deriving sexp]
+    type t = (list(Query.t), option(list(attr)));
+  };
+
+  module Delete = {
+    [@deriving sexp]
+    type attr =
+      | Suffix(string);
+
+    [@deriving sexp]
+    type t = (list(Query.t), option(list(attr)));
+  };
+
   [@deriving sexp]
   type model = string;
 
   [@deriving sexp]
   type entry =
-    | Raw
-    | Suffix(string);
+    | Create(Create.t)
+    | Read(Read.t)
+    | Update(Update.t)
+    | Delete(Delete.t);
 
   [@deriving sexp]
   type t = (model, list(entry));
@@ -104,4 +166,4 @@ module Create = {
 [@deriving sexp]
 type definition =
   | Model(Model.t)
-  | Create(Create.t);
+  | Crud(Crud.t);
