@@ -6,7 +6,13 @@
 %token RIGHT_BRACKET
 %token DOT
 %token QUESTION
-%token <string> COMPARISON
+%token NOT_EQUAL
+%token LESS_THAN
+%token LESS_THAN_OR_EQUAL
+%token GREATER_THAN
+%token GREATER_THAN_OR_EQUAL
+%token EQUAL
+%token IN
 
 // model tokens
 %token MODEL
@@ -68,9 +74,12 @@
 %token AND
 %token OR
 
+%left AND OR
+
 // some literals
 %token <string> NUMBER
 %token <string> IDENT
+%token QUOTE
 
 %token EOF
 
@@ -348,24 +357,58 @@ parse_crud_delete_attr:
     ;    
 
 parse_crud_query:
-    LEFT_PAREN
-    clauses = sep_list(COMMA, parse_crud_query_clause)
-    RIGHT_PAREN
-    { clauses }
+    | query = parse_crud_query_group { query }
+    | term  = parse_crud_query_term  { term }
+    | and_  = parse_crud_query_and   { and_ }
+    | or_   = parse_crud_query_or    { or_ }
     ;
 
-parse_crud_query_clause:
+parse_crud_query_group:
+    LEFT_PAREN
+    query = parse_crud_query
+    RIGHT_PAREN
+    { query }
+    ;
+
+parse_crud_query_term:
     left = parse_crud_query_value
-    op = COMPARISON
+    op = parse_crud_query_op
     right = parse_crud_query_value
-    { (left, op, right) }
+    { Syntax.Crud.Query.Term (left, op, right) }
+    ;
+
+parse_crud_query_op:
+    | NOT_EQUAL             { Syntax.Crud.Query.NotEqual }
+    | LESS_THAN             { Syntax.Crud.Query.LessThan }
+    | LESS_THAN_OR_EQUAL    { Syntax.Crud.Query.LessThanOrEqual }
+    | GREATER_THAN          { Syntax.Crud.Query.GreaterThan }
+    | GREATER_THAN_OR_EQUAL { Syntax.Crud.Query.GreaterThanOrEqual }
+    | EQUAL                 { Syntax.Crud.Query.Equal }
+    | IN                    { Syntax.Crud.Query.In }
     ;
 
 parse_crud_query_value:
-    | QUESTION                           { Syntax.Crud.Query.Placeholder }
-    | field = IDENT                      { Syntax.Crud.Query.Field field }
-    | call = parse_crud_query_value_call { call }
-    | join = parse_crud_query_value_join { join }
+    | placeholder = parse_crud_query_placeholder { placeholder }
+    | literal = parse_crud_query_literal         { literal }
+    | field   = parse_crud_query_field           { field }
+    | call    = parse_crud_query_value_call      { call }
+    | join    = parse_crud_query_value_join      { join }
+    ;
+
+parse_crud_query_placeholder:
+    QUESTION
+    { Syntax.Crud.Query.Placeholder }
+    ;
+
+parse_crud_query_literal:
+    | number = NUMBER            { Syntax.Crud.Query.Literal number }
+    | QUOTE string = IDENT QUOTE { Syntax.Crud.Query.Literal string }
+    ;
+
+parse_crud_query_field:
+    DOT
+    field = IDENT
+    { Syntax.Crud.Query.Field field }
     ;
 
 parse_crud_query_value_call:
@@ -378,10 +421,24 @@ parse_crud_query_value_call:
 
 parse_crud_query_value_join:
     model = IDENT
-    LEFT_BRACKET
-    query = parse_crud_query_clause
-    RIGHT_BRACKET
+    LEFT_PAREN
+    query = parse_crud_query
+    RIGHT_PAREN
     DOT
     field = IDENT
     { Syntax.Crud.Query.Join (model, query, field) }
+    ;
+
+parse_crud_query_and:
+    left = parse_crud_query
+    AND
+    right = parse_crud_query
+    { Syntax.Crud.Query.And (left, right) }
+    ;
+
+parse_crud_query_or:
+    left = parse_crud_query
+    OR
+    right = parse_crud_query
+    { Syntax.Crud.Query.Or (left, right) }
     ;

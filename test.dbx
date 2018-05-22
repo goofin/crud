@@ -93,8 +93,9 @@ model foo (
 )
 
 crud foo (
-    read all (
-        foo = bar[id = ?].baz
-        bif = bar
-    )
+    read all (.id = ? and .id = ? and .id = ?) or
+             .bif = bar(.id = ?).foo_id or
+             (.id = ? or .id = 'blah')
+    update .id = ? (suffix "something")
+    delete lower(.id) = lower(?)
 )

@@ -91,6 +91,16 @@ module Model = {
 module Crud = {
   module Query = {
     [@deriving sexp]
+    type op =
+      | NotEqual
+      | LessThan
+      | LessThanOrEqual
+      | GreaterThan
+      | GreaterThanOrEqual
+      | Equal
+      | In;
+
+    [@deriving sexp]
     type value =
       | Placeholder
       | Field(string)
@@ -99,7 +109,10 @@ module Crud = {
       | Join(string, t, string)
 
     [@deriving sexp]
-    and t = (value, string, value);
+    and t =
+      | Term(value, op, value)
+      | And(t, t)
+      | Or(t, t);
   };
 
   module Create = {
@@ -128,7 +141,7 @@ module Crud = {
       | Suffix(string);
 
     [@deriving sexp]
-    type t = (kind, list(Query.t), option(list(attr)));
+    type t = (kind, Query.t, option(list(attr)));
   };
 
   module Update = {
@@ -137,7 +150,7 @@ module Crud = {
       | Suffix(string);
 
     [@deriving sexp]
-    type t = (list(Query.t), option(list(attr)));
+    type t = (Query.t, option(list(attr)));
   };
 
   module Delete = {
@@ -146,7 +159,7 @@ module Crud = {
       | Suffix(string);
 
     [@deriving sexp]
-    type t = (list(Query.t), option(list(attr)));
+    type t = (Query.t, option(list(attr)));
   };
 
   [@deriving sexp]

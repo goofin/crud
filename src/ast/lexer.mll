@@ -59,12 +59,13 @@ rule token = parse
     | ']'     { needs_comma := true;  emit RIGHT_BRACKET }
     | '.'     { needs_comma := true;  emit DOT }
     | '?'     { needs_comma := true;  emit QUESTION }
-    | "!="    { needs_comma := true;  emit (COMPARISON (Lexing.lexeme lexbuf)) }
-    | '<'     { needs_comma := true;  emit (COMPARISON (Lexing.lexeme lexbuf)) }
-    | "<="    { needs_comma := true;  emit (COMPARISON (Lexing.lexeme lexbuf)) }
-    | '>'     { needs_comma := true;  emit (COMPARISON (Lexing.lexeme lexbuf)) }
-    | ">="    { needs_comma := true;  emit (COMPARISON (Lexing.lexeme lexbuf)) }
-    | '='     { needs_comma := true;  emit (COMPARISON (Lexing.lexeme lexbuf)) }
+    | "!="    { needs_comma := true;  emit NOT_EQUAL }
+    | '<'     { needs_comma := true;  emit LESS_THAN }
+    | "<="    { needs_comma := true;  emit LESS_THAN_OR_EQUAL }
+    | '>'     { needs_comma := true;  emit GREATER_THAN }
+    | ">="    { needs_comma := true;  emit GREATER_THAN_OR_EQUAL }
+    | '='     { needs_comma := true;  emit EQUAL }
+    | "in"    { needs_comma := true;  emit IN }
 
     (* model *)
     | "model"  { needs_comma := true;  emit MODEL }
@@ -124,13 +125,14 @@ rule token = parse
     | "suffix"   { needs_comma := true;  emit SUFFIX }
     | "raw"      { needs_comma := true;  emit RAW }
     | "noreturn" { needs_comma := true;  emit NORETURN }
-    | "and"      { needs_comma := true;  emit AND }
-    | "or"       { needs_comma := true;  emit OR }
+    | "and"      { needs_comma := false; emit AND }
+    | "or"       { needs_comma := false; emit OR }
 
     (* some literals *)
     | number  { needs_comma := true;  emit (NUMBER (Lexing.lexeme lexbuf)) }
     | ident   { needs_comma := true;  emit (IDENT  (Lexing.lexeme lexbuf)) }
     | quoted  { needs_comma := true;  emit (IDENT  (unquote (Lexing.lexeme lexbuf))) }
+    | '\''    { needs_comma := true;  emit QUOTE }
 
     (* eof *)
     | eof     { EOF }
