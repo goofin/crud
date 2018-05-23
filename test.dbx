@@ -92,10 +92,14 @@ model foo (
     field null_date date (nullable, updatable, autoupdate)
 )
 
-crud foo (
-    read all (.id = ? and .id = ? and .id = ?) or
-             .bif = bar(.id = ?).foo_id or
-             (.id = ? or .id = 'blah')
-    update .id = ? (suffix "something")
-    delete lower(.id) = lower(?)
+crud users (
+    read find .id = ?
+    update    .id = ?
+    delete    .id = ?
+
+    read all   account(.id = ?).user_id = .id
+    read paged (orderby desc)
+    read all \
+        lower(."name") = lower(?) \
+        (suffix "by_name")
 )

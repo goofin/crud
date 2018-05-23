@@ -35,12 +35,12 @@ let newline = '\r' | '\n' | "\r\n"
 
 let number  = ['0'-'9']+
 let ident   = ['a'-'z' '_'] ['a'-'z' '_' '0'-'9']*
-let quoted  = '"' [^'"']* '"'
 
 rule token = parse
     | white+ { token lexbuf }
 
     (* automatic comma insertion *)
+    | '\\'    { needs_comma := false; token lexbuf }
     | newline {
         Lexing.new_line lexbuf;
         if !needs_comma then begin
@@ -124,6 +124,9 @@ rule token = parse
     | "paged"    { needs_comma := true;  emit PAGED }
     | "suffix"   { needs_comma := true;  emit SUFFIX }
     | "raw"      { needs_comma := true;  emit RAW }
+    | "orderby"  { needs_comma := true; emit ORDERBY }
+    | "asc"      { needs_comma := true; emit ASC }
+    | "desc"     { needs_comma := true; emit DESC }
     | "noreturn" { needs_comma := true;  emit NORETURN }
     | "and"      { needs_comma := false; emit AND }
     | "or"       { needs_comma := false; emit OR }
@@ -131,9 +134,25 @@ rule token = parse
     (* some literals *)
     | number  { needs_comma := true;  emit (NUMBER (Lexing.lexeme lexbuf)) }
     | ident   { needs_comma := true;  emit (IDENT  (Lexing.lexeme lexbuf)) }
-    | quoted  { needs_comma := true;  emit (IDENT  (unquote (Lexing.lexeme lexbuf))) }
-    | '\''    { needs_comma := true;  emit QUOTE }
+    | '"'     { needs_comma := true;  read_ident (Buffer.create 0) lexbuf }
+    | '\''    { needs_comma := true;  read_quote (Buffer.create 0) lexbuf }
 
     (* eof *)
     | eof     { EOF }
     | _       { lexing_error lexbuf }
+
+and read_quote buf = parse
+    | '\''            { emit (STRING (Buffer.contents buf)) }
+    | '\\' '\''       { Buffer.add_char buf '\''; read_quote buf lexbuf }
+    | '\\' '\\'       { Buffer.add_char buf '\\'; read_quote buf lexbuf }
+    | [^ '\'' '\\' ]+ { Buffer.add_string buf (Lexing.lexeme lexbuf); read_quote buf lexbuf }
+    | _   { lexing_error lexbuf }
+    | eof { raise (Error ("EOF", lexbuf.Lexing.lex_curr_p)) }
+
+and read_ident buf = parse
+    | '"'            { emit (IDENT (Buffer.contents buf)) }
+    | '\\' '"'       { Buffer.add_char buf '"';  read_ident buf lexbuf }
+    | '\\' '\\'      { Buffer.add_char buf '\\'; read_ident buf lexbuf }
+    | [^ '"' '\\' ]+ { Buffer.add_string buf (Lexing.lexeme lexbuf); read_ident buf lexbuf }
+    | _   { lexing_error lexbuf }
+    | eof { raise (Error ("EOF", lexbuf.Lexing.lex_curr_p)) }

@@ -71,6 +71,9 @@
 %token SUFFIX
 %token RAW
 %token NORETURN
+%token ORDERBY
+%token ASC
+%token DESC
 %token AND
 %token OR
 
@@ -79,7 +82,7 @@
 // some literals
 %token <string> NUMBER
 %token <string> IDENT
-%token QUOTE
+%token <string> STRING
 
 %token EOF
 
@@ -293,11 +296,23 @@ parse_crud_create_attr:
     | SUFFIX suffix = IDENT { Syntax.Crud.Create.Suffix suffix }
 
 parse_crud_read:
+    | read = parse_crud_read_noquery { read }
+    | read = parse_crud_read_query   { read }
+    ;
+
+parse_crud_read_noquery:
+    READ
+    kind = parse_crud_read_kind
+    attrs = option(parse_crud_read_attrs)
+    { Syntax.Crud.Read (kind, None, attrs) }
+    ;
+
+parse_crud_read_query:
     READ
     kind = parse_crud_read_kind
     query = parse_crud_query
     attrs = option(parse_crud_read_attrs)
-    { Syntax.Crud.Read (kind, query, attrs) }
+    { Syntax.Crud.Read (kind, Some query, attrs) }
     ;
 
 parse_crud_read_kind:
@@ -317,8 +332,26 @@ parse_crud_read_attrs:
     ;
 
 parse_crud_read_attr:
-    | SUFFIX suffix = IDENT { Syntax.Crud.Read.Suffix suffix }
+    | suffix  = parse_crud_read_attr_suffix  { suffix }
+    | orderby = parse_crud_read_attr_orderby { orderby }
     ;    
+
+parse_crud_read_attr_suffix:
+    SUFFIX
+    suffix = IDENT
+    { Syntax.Crud.Read.Suffix suffix }
+    ;
+
+parse_crud_read_attr_orderby:
+    ORDERBY
+    direction = parse_crud_read_attr_orderby_direction
+    { Syntax.Crud.Read.OrderBy direction }
+    ;
+
+parse_crud_read_attr_orderby_direction:
+    | ASC  { Syntax.Crud.Read.Ascending }
+    | DESC { Syntax.Crud.Read.Descending }
+    ;
 
 parse_crud_update:
     UPDATE
@@ -401,8 +434,8 @@ parse_crud_query_placeholder:
     ;
 
 parse_crud_query_literal:
-    | number = NUMBER            { Syntax.Crud.Query.Literal number }
-    | QUOTE string = IDENT QUOTE { Syntax.Crud.Query.Literal string }
+    | number = NUMBER { Syntax.Crud.Query.Literal number }
+    | string = STRING { Syntax.Crud.Query.Literal string }
     ;
 
 parse_crud_query_field:

@@ -107,7 +107,6 @@ module Crud = {
       | Literal(string)
       | Call(string, value)
       | Join(string, t, string)
-
     [@deriving sexp]
     and t =
       | Term(value, op, value)
@@ -137,11 +136,17 @@ module Crud = {
       | Paged;
 
     [@deriving sexp]
-    type attr =
-      | Suffix(string);
+    type direction =
+      | Ascending
+      | Descending;
 
     [@deriving sexp]
-    type t = (kind, Query.t, option(list(attr)));
+    type attr =
+      | Suffix(string)
+      | OrderBy(direction);
+
+    [@deriving sexp]
+    type t = (kind, option(Query.t), option(list(attr)));
   };
 
   module Update = {
