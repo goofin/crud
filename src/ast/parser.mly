@@ -86,10 +86,12 @@
 
 %token EOF
 
-%start <Syntax.definition list> prog
+%start <Syntax.definition list> dbx
 %%
 
+//
 // support for left recursive list that allows optional trailing delimiter
+//
 
 rev_nonempty_sep_list(DELIM, X):
   | x = X { [ x ] }
@@ -106,9 +108,11 @@ rev_sep_list(DELIM, X):
 sep_list(DELIM, X):
   xs = rev_sep_list(DELIM, X) DELIM? { List.rev xs }
 
-// end support for left recursion
+///////////////////////////////////////////////////////////////////////////////
+// dbx
+///////////////////////////////////////////////////////////////////////////////
 
-prog:
+dbx:
     defs = sep_list(COMMA, parse_definition)
     EOF
     { defs }
@@ -118,6 +122,10 @@ parse_definition:
     | model = parse_model { model }
     | crud  = parse_crud  { crud }
     ;
+
+///////////////////////////////////////////////////////////////////////////////
+// models
+///////////////////////////////////////////////////////////////////////////////
 
 parse_model:
     MODEL
@@ -142,11 +150,19 @@ parse_model_entry:
     | rel    = parse_model_rel    { rel }
     ;
 
+//
+// model table
+//
+
 parse_model_table:
     TABLE
     name = IDENT
     { Syntax.Model.Table name }
     ;
+
+//
+// model key
+//
 
 parse_model_key:
     KEY
@@ -154,11 +170,19 @@ parse_model_key:
     { Syntax.Model.Key fields }
     ;
 
+//
+// model unique
+//
+
 parse_model_unique:
     UNIQUE
     fields = list(IDENT)
     { Syntax.Model.Unique fields }
     ;
+
+//
+// model index
+//
 
 parse_model_index:
     INDEX
@@ -190,6 +214,10 @@ parse_model_index_unique:
     UNIQUE
     { Syntax.Model.Index.Unique }
     ;
+
+//
+// model fiels
+//
 
 parse_model_field:
     FIELD
@@ -262,11 +290,22 @@ parse_model_rel_attr:
     | UPDATABLE           { Syntax.Model.Rel.Updatable }
     ;
 
+///////////////////////////////////////////////////////////////////////////////
+// cruds
+///////////////////////////////////////////////////////////////////////////////
+
 parse_crud:
     CRUD
     name = IDENT
     entries = parse_crud_entries
     { Syntax.Crud (name, entries) }
+    ;
+
+parse_crud_attrs(inner):
+    LEFT_PAREN
+    attrs = sep_list(COMMA, inner)
+    RIGHT_PAREN
+    { attrs }
     ;
 
 parse_crud_entries:
@@ -283,10 +322,14 @@ parse_crud_entry:
     | delete = parse_crud_delete { delete }
     ;
 
+//
+// crud create
+//
+
 parse_crud_create:
     CREATE
     LEFT_PAREN
-    attrs = sep_list(COMMA, parse_crud_create_attr)
+    attrs = parse_crud_attrs(parse_crud_create_attr)
     RIGHT_PAREN
     { Syntax.Crud.Create attrs }
     ;
@@ -294,6 +337,10 @@ parse_crud_create:
 parse_crud_create_attr:
     | RAW                   { Syntax.Crud.Create.Raw }
     | SUFFIX suffix = IDENT { Syntax.Crud.Create.Suffix suffix }
+
+//
+// crud read
+//
 
 parse_crud_read:
     | read = parse_crud_read_noquery { read }
@@ -303,7 +350,7 @@ parse_crud_read:
 parse_crud_read_noquery:
     READ
     kind = parse_crud_read_kind
-    attrs = option(parse_crud_read_attrs)
+    attrs = option(parse_crud_attrs(parse_crud_read_attr))
     { Syntax.Crud.Read (kind, None, attrs) }
     ;
 
@@ -311,7 +358,7 @@ parse_crud_read_query:
     READ
     kind = parse_crud_read_kind
     query = parse_crud_query
-    attrs = option(parse_crud_read_attrs)
+    attrs = option(parse_crud_attrs(parse_crud_read_attr))
     { Syntax.Crud.Read (kind, Some query, attrs) }
     ;
 
@@ -324,73 +371,48 @@ parse_crud_read_kind:
     | LIMITED { Syntax.Crud.Read.Limited }
     | PAGED   { Syntax.Crud.Read.Paged }
 
-parse_crud_read_attrs:
-    LEFT_PAREN
-    attrs = sep_list(COMMA, parse_crud_read_attr)
-    RIGHT_PAREN
-    { attrs }
-    ;
-
 parse_crud_read_attr:
-    | suffix  = parse_crud_read_attr_suffix  { suffix }
-    | orderby = parse_crud_read_attr_orderby { orderby }
+    | ORDERBY ASC           { Syntax.Crud.Read.(OrderBy Ascending) }
+    | ORDERBY DESC          { Syntax.Crud.Read.(OrderBy Descending) }
+    | SUFFIX suffix = IDENT { Syntax.Crud.Read.Suffix suffix }
     ;    
 
-parse_crud_read_attr_suffix:
-    SUFFIX
-    suffix = IDENT
-    { Syntax.Crud.Read.Suffix suffix }
-    ;
-
-parse_crud_read_attr_orderby:
-    ORDERBY
-    direction = parse_crud_read_attr_orderby_direction
-    { Syntax.Crud.Read.OrderBy direction }
-    ;
-
-parse_crud_read_attr_orderby_direction:
-    | ASC  { Syntax.Crud.Read.Ascending }
-    | DESC { Syntax.Crud.Read.Descending }
-    ;
+//
+// crud update
+//
 
 parse_crud_update:
     UPDATE
     query = parse_crud_query
-    attrs = option(parse_crud_update_attrs)
+    attrs = option(parse_crud_attrs(parse_crud_update_attr))
     { Syntax.Crud.Update (query, attrs) }
-    ;
-
-parse_crud_update_attrs:
-    LEFT_PAREN
-    attrs = sep_list(COMMA, parse_crud_update_attr)
-    RIGHT_PAREN
-    { attrs }
     ;
 
 parse_crud_update_attr:
     | SUFFIX suffix = IDENT { Syntax.Crud.Update.Suffix suffix }
     ;    
 
+//
+// crud delete
+//
+
 parse_crud_delete:
     DELETE
     query = parse_crud_query
-    attrs = option(parse_crud_delete_attrs)
+    attrs = option(parse_crud_attrs(parse_crud_delete_attr))
     { Syntax.Crud.Delete (query, attrs) }
-    ;
-
-parse_crud_delete_attrs:
-    LEFT_PAREN
-    attrs = sep_list(COMMA, parse_crud_delete_attr)
-    RIGHT_PAREN
-    { attrs }
     ;
 
 parse_crud_delete_attr:
     | SUFFIX suffix = IDENT { Syntax.Crud.Delete.Suffix suffix }
-    ;    
+    ;
+
+//
+// crud query
+//
 
 parse_crud_query:
-    | query = parse_crud_query_group { query }
+    | group = parse_crud_query_group { group }
     | term  = parse_crud_query_term  { term }
     | and_  = parse_crud_query_and   { and_ }
     | or_   = parse_crud_query_or    { or_ }
@@ -421,27 +443,12 @@ parse_crud_query_op:
     ;
 
 parse_crud_query_value:
-    | placeholder = parse_crud_query_placeholder { placeholder }
-    | literal = parse_crud_query_literal         { literal }
-    | field   = parse_crud_query_field           { field }
-    | call    = parse_crud_query_value_call      { call }
-    | join    = parse_crud_query_value_join      { join }
-    ;
-
-parse_crud_query_placeholder:
-    QUESTION
-    { Syntax.Crud.Query.Placeholder }
-    ;
-
-parse_crud_query_literal:
-    | number = NUMBER { Syntax.Crud.Query.Literal number }
-    | string = STRING { Syntax.Crud.Query.Literal string }
-    ;
-
-parse_crud_query_field:
-    DOT
-    field = IDENT
-    { Syntax.Crud.Query.Field field }
+    | QUESTION                              { Syntax.Crud.Query.Placeholder }
+    | number = NUMBER                       { Syntax.Crud.Query.Literal number }
+    | string = STRING                       { Syntax.Crud.Query.Literal string }
+    | DOT field = IDENT                     { Syntax.Crud.Query.Field field }
+    | call    = parse_crud_query_value_call { call }
+    | join    = parse_crud_query_value_join { join }
     ;
 
 parse_crud_query_value_call:

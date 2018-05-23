@@ -68,13 +68,13 @@ let print_error =
       eprintf("Invalid input %s\n%!", invalid_input);
     };
 
-let prog = Parser.Incremental.prog;
+let dbx = Parser.Incremental.dbx;
 
 let parse_exn = (parse_fun, lexbuf) => {
   open MenhirLib.General;
   module Interp = Parser.MenhirInterpreter;
   let input = Interp.lexer_lexbuf_to_supplier(Lexer.token, lexbuf);
-  let success = prog => prog;
+  let success = dbx => dbx;
   let failure = error_state => {
     let env =
       switch (error_state) {
