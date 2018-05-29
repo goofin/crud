@@ -2,9 +2,13 @@ open Core;
 
 let loop = (filename, ()) =>
   Crud_ast.(
-    List.iter(Parse.parse_file_exn(Parse.dbx, filename), ~f=def =>
-      printf("%s\n", def |> Syntax.sexp_of_definition |> Sexp.to_string_hum)
-    )
+    switch (Parse.parse_file(Parse.dbx, filename)) {
+    | Ok(defs) =>
+      List.iter(defs, ~f=def =>
+        printf("%s\n", def |> Syntax.sexp_of_definition |> Sexp.to_string_hum)
+      )
+    | Error(err) => Parse.print_error(err)
+    }
   );
 
 let () =
