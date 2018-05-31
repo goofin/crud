@@ -239,18 +239,18 @@ parse_model_index_entry:
 parse_model_index_name:
     NAME
     name = annotated_ident
-    { annotate $startpos $endpos (Syntax.Model.Index.Name name) }
+    { Syntax.Model.Index.Name (annotate $startpos $endpos (name)) }
     ;
 
 parse_model_index_fields:
     FIELDS
     fields = list(annotated_ident)
-    { annotate $startpos $endpos (Syntax.Model.Index.Fields fields) }
+    { Syntax.Model.Index.Fields (annotate $startpos $endpos (fields)) }
     ;
 
 parse_model_index_unique:
     UNIQUE
-    { annotate $startpos $endpos (Syntax.Model.Index.Unique) }
+    { Syntax.Model.Index.Unique (annotate $startpos $endpos ()) }
     ;
 
 //
@@ -266,20 +266,20 @@ parse_model_field:
     ;
 
 parse_model_field_type:
-    | SERIAL     { annotate $startpos $endpos (Syntax.Model.Field.Serial) }
-    | SERIAL64   { annotate $startpos $endpos (Syntax.Model.Field.Serial64) }
-    | INT        { annotate $startpos $endpos (Syntax.Model.Field.Int) }
-    | INT64      { annotate $startpos $endpos (Syntax.Model.Field.Int64) }
-    | UINT       { annotate $startpos $endpos (Syntax.Model.Field.Uint) }
-    | UINT64     { annotate $startpos $endpos (Syntax.Model.Field.Uint64) }
-    | BOOL       { annotate $startpos $endpos (Syntax.Model.Field.Bool) }
-    | TEXT       { annotate $startpos $endpos (Syntax.Model.Field.Text) }
-    | DATE       { annotate $startpos $endpos (Syntax.Model.Field.Date) }
-    | TIMESTAMP  { annotate $startpos $endpos (Syntax.Model.Field.Timestamp) }
-    | UTIMESTAMP { annotate $startpos $endpos (Syntax.Model.Field.Utimestamp) }
-    | FLOAT      { annotate $startpos $endpos (Syntax.Model.Field.Float) }
-    | FLOAT64    { annotate $startpos $endpos (Syntax.Model.Field.Float64) }
-    | BLOB       { annotate $startpos $endpos (Syntax.Model.Field.Blob) }
+    | SERIAL     { Syntax.Model.Field.Serial (annotate $startpos $endpos ()) }
+    | SERIAL64   { Syntax.Model.Field.Serial64 (annotate $startpos $endpos ()) }
+    | INT        { Syntax.Model.Field.Int (annotate $startpos $endpos ()) }
+    | INT64      { Syntax.Model.Field.Int64 (annotate $startpos $endpos ()) }
+    | UINT       { Syntax.Model.Field.Uint (annotate $startpos $endpos ()) }
+    | UINT64     { Syntax.Model.Field.Uint64 (annotate $startpos $endpos ()) }
+    | BOOL       { Syntax.Model.Field.Bool (annotate $startpos $endpos ()) }
+    | TEXT       { Syntax.Model.Field.Text (annotate $startpos $endpos ()) }
+    | DATE       { Syntax.Model.Field.Date (annotate $startpos $endpos ()) }
+    | TIMESTAMP  { Syntax.Model.Field.Timestamp (annotate $startpos $endpos ()) }
+    | UTIMESTAMP { Syntax.Model.Field.Utimestamp (annotate $startpos $endpos ()) }
+    | FLOAT      { Syntax.Model.Field.Float (annotate $startpos $endpos ()) }
+    | FLOAT64    { Syntax.Model.Field.Float64 (annotate $startpos $endpos ()) }
+    | BLOB       { Syntax.Model.Field.Blob (annotate $startpos $endpos ()) }
     ;
 
 parse_model_field_attrs:
@@ -290,12 +290,12 @@ parse_model_field_attrs:
     ;
 
 parse_model_field_attr:
-    | COLUMN name = annotated_ident    { annotate $startpos $endpos (Syntax.Model.Field.Column name) }
-    | NULLABLE                         { annotate $startpos $endpos (Syntax.Model.Field.Nullable) }
-    | UPDATABLE                        { annotate $startpos $endpos (Syntax.Model.Field.Updatable) }
-    | AUTOINSERT                       { annotate $startpos $endpos (Syntax.Model.Field.Autoinsert) }
-    | AUTOUPDATE                       { annotate $startpos $endpos (Syntax.Model.Field.Autoupdate) }
-    | LENGTH length = annotated_number { annotate $startpos $endpos (Syntax.Model.Field.Length length) }
+    | COLUMN name = annotated_ident    { Syntax.Model.Field.Column (annotate $startpos $endpos (name)) }
+    | NULLABLE                         { Syntax.Model.Field.Nullable (annotate $startpos $endpos ()) }
+    | UPDATABLE                        { Syntax.Model.Field.Updatable (annotate $startpos $endpos ()) }
+    | AUTOINSERT                       { Syntax.Model.Field.Autoinsert (annotate $startpos $endpos ()) }
+    | AUTOUPDATE                       { Syntax.Model.Field.Autoupdate (annotate $startpos $endpos ()) }
+    | LENGTH length = annotated_number { Syntax.Model.Field.Length (annotate $startpos $endpos (length)) }
     ;
 
 parse_model_rel:
@@ -310,9 +310,9 @@ parse_model_rel:
     ;
 
 parse_model_rel_kind:
-    | SETNULL  { annotate $startpos $endpos (Syntax.Model.Rel.Setnull) }
-    | CASCADE  { annotate $startpos $endpos (Syntax.Model.Rel.Cascade) }
-    | RESTRICT { annotate $startpos $endpos (Syntax.Model.Rel.Restrict) }
+    | SETNULL  { Syntax.Model.Rel.Setnull (annotate $startpos $endpos ()) }
+    | CASCADE  { Syntax.Model.Rel.Cascade (annotate $startpos $endpos ()) }
+    | RESTRICT { Syntax.Model.Rel.Restrict (annotate $startpos $endpos ()) }
     ;
 
 parse_model_rel_attrs:
@@ -323,9 +323,9 @@ parse_model_rel_attrs:
     ;
 
 parse_model_rel_attr:
-    | COLUMN name = annotated_ident { annotate $startpos $endpos (Syntax.Model.Rel.Column name) }
-    | NULLABLE                      { annotate $startpos $endpos (Syntax.Model.Rel.Nullable) }
-    | UPDATABLE                     { annotate $startpos $endpos (Syntax.Model.Rel.Updatable) }
+    | COLUMN name = annotated_ident { Syntax.Model.Rel.Column (annotate $startpos $endpos (name)) }
+    | NULLABLE                      { Syntax.Model.Rel.Nullable (annotate $startpos $endpos ()) }
+    | UPDATABLE                     { Syntax.Model.Rel.Updatable (annotate $startpos $endpos ()) }
     ;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -372,12 +372,12 @@ parse_crud_entry:
 parse_crud_create:
     CREATE
     attrs = parse_crud_attrs(parse_crud_create_attr)
-    { annotate $startpos $endpos (Syntax.Crud.Create attrs) }
+    { Syntax.Crud.Create (annotate $startpos $endpos (attrs)) }
     ;
 
 parse_crud_create_attr:
-    | RAW                             { annotate $startpos $endpos (Syntax.Crud.Create.Raw) }
-    | SUFFIX suffix = annotated_ident { annotate $startpos $endpos (Syntax.Crud.Create.Suffix suffix) }
+    | RAW                             { Syntax.Crud.Create.Raw (annotate $startpos $endpos ()) }
+    | SUFFIX suffix = annotated_ident { Syntax.Crud.Create.Suffix (annotate $startpos $endpos (suffix)) }
 
 //
 // crud read
@@ -392,7 +392,7 @@ parse_crud_read_noquery:
     READ
     kind = parse_crud_read_kind
     attrs = option(parse_crud_attrs(parse_crud_read_attr))
-    { annotate $startpos $endpos (Syntax.Crud.Read (kind, None, attrs)) }
+    { Syntax.Crud.Read (annotate $startpos $endpos (kind, None, attrs)) }
     ;
 
 parse_crud_read_query:
@@ -400,17 +400,17 @@ parse_crud_read_query:
     kind = parse_crud_read_kind
     query = parse_crud_query
     attrs = option(parse_crud_attrs(parse_crud_read_attr))
-    { annotate $startpos $endpos (Syntax.Crud.Read (kind, Some query, attrs)) }
+    { Syntax.Crud.Read (annotate $startpos $endpos (kind, Some query, attrs)) }
     ;
 
 parse_crud_read_kind:
-    | HAS     { annotate $startpos $endpos (Syntax.Crud.Read.Has) }
-    | FIRST   { annotate $startpos $endpos (Syntax.Crud.Read.First) }
-    | ONE     { annotate $startpos $endpos (Syntax.Crud.Read.One) }
-    | ALL     { annotate $startpos $endpos (Syntax.Crud.Read.All) }
-    | FIND    { annotate $startpos $endpos (Syntax.Crud.Read.Find) }
-    | LIMITED { annotate $startpos $endpos (Syntax.Crud.Read.Limited) }
-    | PAGED   { annotate $startpos $endpos (Syntax.Crud.Read.Paged) }
+    | HAS     { Syntax.Crud.Read.Has (annotate $startpos $endpos ()) }
+    | FIRST   { Syntax.Crud.Read.First (annotate $startpos $endpos ()) }
+    | ONE     { Syntax.Crud.Read.One (annotate $startpos $endpos ()) }
+    | ALL     { Syntax.Crud.Read.All (annotate $startpos $endpos ()) }
+    | FIND    { Syntax.Crud.Read.Find (annotate $startpos $endpos ()) }
+    | LIMITED { Syntax.Crud.Read.Limited (annotate $startpos $endpos ()) }
+    | PAGED   { Syntax.Crud.Read.Paged (annotate $startpos $endpos ()) }
 
 parse_crud_read_attr:
     | orderby = parse_crud_read_attr_orderby { orderby }
@@ -419,18 +419,18 @@ parse_crud_read_attr:
 parse_crud_read_attr_orderby:
     ORDERBY
     direction = parse_crud_read_attr_orderby_direction
-    { annotate $startpos $endpos (Syntax.Crud.Read.OrderBy direction) }
+    { Syntax.Crud.Read.OrderBy (annotate $startpos $endpos (direction)) }
     ;
 
 parse_crud_read_attr_orderby_direction:
-    | ASC  { annotate $startpos $endpos (Syntax.Crud.Read.Ascending) }
-    | DESC { annotate $startpos $endpos (Syntax.Crud.Read.Descending) }
+    | ASC  { Syntax.Crud.Read.Ascending (annotate $startpos $endpos ()) }
+    | DESC { Syntax.Crud.Read.Descending (annotate $startpos $endpos ()) }
     ;
 
 parse_crud_read_attr_suffix:
     SUFFIX
     suffix = annotated_ident
-    { annotate $startpos $endpos (Syntax.Crud.Read.Suffix suffix) }
+    { Syntax.Crud.Read.Suffix (annotate $startpos $endpos (suffix)) }
     ;
 
 //
@@ -441,11 +441,11 @@ parse_crud_update:
     UPDATE
     query = parse_crud_query
     attrs = option(parse_crud_attrs(parse_crud_update_attr))
-    { annotate $startpos $endpos (Syntax.Crud.Update (query, attrs)) }
+    { Syntax.Crud.Update (annotate $startpos $endpos (query, attrs)) }
     ;
 
 parse_crud_update_attr:
-    | SUFFIX suffix = annotated_ident { annotate $startpos $endpos (Syntax.Crud.Update.Suffix suffix) }
+    | SUFFIX suffix = annotated_ident { Syntax.Crud.Update.Suffix (annotate $startpos $endpos (suffix)) }
     ;
 
 //
@@ -456,11 +456,11 @@ parse_crud_delete:
     DELETE
     query = parse_crud_query
     attrs = option(parse_crud_attrs(parse_crud_delete_attr))
-    { annotate $startpos $endpos (Syntax.Crud.Delete (query, attrs)) }
+    { Syntax.Crud.Delete (annotate $startpos $endpos (query, attrs)) }
     ;
 
 parse_crud_delete_attr:
-    | SUFFIX suffix = annotated_ident { annotate $startpos $endpos (Syntax.Crud.Delete.Suffix suffix) }
+    | SUFFIX suffix = annotated_ident { Syntax.Crud.Delete.Suffix (annotate $startpos $endpos (suffix)) }
     ;
 
 //
@@ -485,24 +485,24 @@ parse_crud_query_term:
     left = parse_crud_query_value
     op = parse_crud_query_op
     right = parse_crud_query_value
-    { annotate $startpos $endpos (Syntax.Crud.Query.Term (left, op, right)) }
+    { Syntax.Crud.Query.Term (annotate $startpos $endpos (left, op, right)) }
     ;
 
 parse_crud_query_op:
-    | NOT_EQUAL             { annotate $startpos $endpos (Syntax.Crud.Query.NotEqual) }
-    | LESS_THAN             { annotate $startpos $endpos (Syntax.Crud.Query.LessThan) }
-    | LESS_THAN_OR_EQUAL    { annotate $startpos $endpos (Syntax.Crud.Query.LessThanOrEqual) }
-    | GREATER_THAN          { annotate $startpos $endpos (Syntax.Crud.Query.GreaterThan) }
-    | GREATER_THAN_OR_EQUAL { annotate $startpos $endpos (Syntax.Crud.Query.GreaterThanOrEqual) }
-    | EQUAL                 { annotate $startpos $endpos (Syntax.Crud.Query.Equal) }
-    | IN                    { annotate $startpos $endpos (Syntax.Crud.Query.In) }
+    | NOT_EQUAL             { Syntax.Crud.Query.NotEqual (annotate $startpos $endpos ()) }
+    | LESS_THAN             { Syntax.Crud.Query.LessThan (annotate $startpos $endpos ()) }
+    | LESS_THAN_OR_EQUAL    { Syntax.Crud.Query.LessThanOrEqual (annotate $startpos $endpos ()) }
+    | GREATER_THAN          { Syntax.Crud.Query.GreaterThan (annotate $startpos $endpos ()) }
+    | GREATER_THAN_OR_EQUAL { Syntax.Crud.Query.GreaterThanOrEqual (annotate $startpos $endpos ()) }
+    | EQUAL                 { Syntax.Crud.Query.Equal (annotate $startpos $endpos ()) }
+    | IN                    { Syntax.Crud.Query.In (annotate $startpos $endpos ()) }
     ;
 
 parse_crud_query_value:
-    | QUESTION                              { annotate $startpos $endpos (Syntax.Crud.Query.Placeholder) }
-    | number = annotated_number             { annotate $startpos $endpos (Syntax.Crud.Query.Literal number) }
-    | string = annotated_string             { annotate $startpos $endpos (Syntax.Crud.Query.Literal string) }
-    | DOT field = annotated_ident           { annotate $startpos $endpos (Syntax.Crud.Query.Field field) }
+    | QUESTION                              { Syntax.Crud.Query.Placeholder (annotate $startpos $endpos ()) }
+    | number = annotated_number             { Syntax.Crud.Query.Literal (annotate $startpos $endpos (number)) }
+    | string = annotated_string             { Syntax.Crud.Query.Literal (annotate $startpos $endpos (string)) }
+    | DOT field = annotated_ident           { Syntax.Crud.Query.Field (annotate $startpos $endpos (field)) }
     | call    = parse_crud_query_value_call { call }
     | join    = parse_crud_query_value_join { join }
     ;
@@ -512,7 +512,7 @@ parse_crud_query_value_call:
     LEFT_PAREN
     arg = parse_crud_query_value
     RIGHT_PAREN
-    { annotate $startpos $endpos (Syntax.Crud.Query.Call (func, arg)) }
+    { Syntax.Crud.Query.Call (annotate $startpos $endpos (func, arg)) }
     ;
 
 parse_crud_query_value_join:
@@ -522,19 +522,19 @@ parse_crud_query_value_join:
     RIGHT_PAREN
     DOT
     field = annotated_ident
-    { annotate $startpos $endpos (Syntax.Crud.Query.Join (model, query, field)) }
+    { Syntax.Crud.Query.Join (annotate $startpos $endpos (model, query, field)) }
     ;
 
 parse_crud_query_and:
     left = parse_crud_query
     AND
     right = parse_crud_query
-    { annotate $startpos $endpos (Syntax.Crud.Query.And (left, right)) }
+    { Syntax.Crud.Query.And (annotate $startpos $endpos (left, right)) }
     ;
 
 parse_crud_query_or:
     left = parse_crud_query
     OR
     right = parse_crud_query
-    { annotate $startpos $endpos (Syntax.Crud.Query.Or (left, right)) }
+    { Syntax.Crud.Query.Or (annotate $startpos $endpos (left, right)) }
     ;

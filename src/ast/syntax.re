@@ -23,18 +23,25 @@ module Annotate = {
 
   [@deriving sexp]
   type string = string_;
+
+  /* TODO(jeff): gotta be a way to avoid this type hanging around */
+  [@deriving sexp]
+  type unit_ = t(unit);
+
+  [@deriving sexp]
+  type unit = unit_;
 };
 
 module Model = {
   module Index = {
     [@deriving sexp]
     type entry =
-      | Name(Annotate.string)
-      | Fields(list(Annotate.string))
-      | Unique;
+      | Name(Annotate.t(Annotate.string))
+      | Fields(Annotate.t(list(Annotate.string)))
+      | Unique(Annotate.unit);
 
     [@deriving sexp]
-    type t = list(Annotate.t(entry));
+    type t = list(entry);
   };
 
   module Field = {
@@ -43,32 +50,32 @@ module Model = {
 
     [@deriving sexp]
     type type_ =
-      | Serial
-      | Serial64
-      | Int
-      | Int64
-      | Uint
-      | Uint64
-      | Bool
-      | Text
-      | Date
-      | Timestamp
-      | Utimestamp
-      | Float
-      | Float64
-      | Blob;
+      | Serial(Annotate.unit)
+      | Serial64(Annotate.unit)
+      | Int(Annotate.unit)
+      | Int64(Annotate.unit)
+      | Uint(Annotate.unit)
+      | Uint64(Annotate.unit)
+      | Bool(Annotate.unit)
+      | Text(Annotate.unit)
+      | Date(Annotate.unit)
+      | Timestamp(Annotate.unit)
+      | Utimestamp(Annotate.unit)
+      | Float(Annotate.unit)
+      | Float64(Annotate.unit)
+      | Blob(Annotate.unit);
 
     [@deriving sexp]
     type attr =
-      | Column(Annotate.string)
-      | Nullable
-      | Updatable
-      | Autoinsert
-      | Autoupdate
-      | Length(Annotate.string);
+      | Column(Annotate.t(Annotate.string))
+      | Nullable(Annotate.unit)
+      | Updatable(Annotate.unit)
+      | Autoinsert(Annotate.unit)
+      | Autoupdate(Annotate.unit)
+      | Length(Annotate.t(Annotate.string));
 
     [@deriving sexp]
-    type t = (name, Annotate.t(type_), option(list(Annotate.t(attr))));
+    type t = (name, type_, option(list(attr)));
   };
 
   module Rel = {
@@ -83,18 +90,18 @@ module Model = {
 
     [@deriving sexp]
     type kind =
-      | Setnull
-      | Cascade
-      | Restrict;
+      | Setnull(Annotate.unit)
+      | Cascade(Annotate.unit)
+      | Restrict(Annotate.unit);
 
     [@deriving sexp]
     type attr =
-      | Column(Annotate.string)
-      | Nullable
-      | Updatable;
+      | Column(Annotate.t(Annotate.string))
+      | Nullable(Annotate.unit)
+      | Updatable(Annotate.unit);
 
     [@deriving sexp]
-    type t = (name, model, field, Annotate.t(kind), option(list(Annotate.t(attr))));
+    type t = (name, model, field, kind, option(list(attr)));
   };
 
   [@deriving sexp]
@@ -117,79 +124,79 @@ module Crud = {
   module Query = {
     [@deriving sexp]
     type op =
-      | NotEqual
-      | LessThan
-      | LessThanOrEqual
-      | GreaterThan
-      | GreaterThanOrEqual
-      | Equal
-      | In;
+      | NotEqual(Annotate.unit)
+      | LessThan(Annotate.unit)
+      | LessThanOrEqual(Annotate.unit)
+      | GreaterThan(Annotate.unit)
+      | GreaterThanOrEqual(Annotate.unit)
+      | Equal(Annotate.unit)
+      | In(Annotate.unit);
 
     [@deriving sexp]
     type value =
-      | Placeholder
-      | Field(Annotate.string)
-      | Literal(Annotate.string)
-      | Call(Annotate.string, Annotate.t(value))
-      | Join(Annotate.string, Annotate.t(t), Annotate.string)
+      | Placeholder(Annotate.unit)
+      | Field(Annotate.t(Annotate.string))
+      | Literal(Annotate.t(Annotate.string))
+      | Call(Annotate.t((Annotate.string, value)))
+      | Join(Annotate.t((Annotate.string, t, Annotate.string)))
     [@deriving sexp]
     and t =
-      | Term(Annotate.t(value), Annotate.t(op), Annotate.t(value))
-      | And(Annotate.t(t), Annotate.t(t))
-      | Or(Annotate.t(t), Annotate.t(t));
+      | Term(Annotate.t((value, op, value)))
+      | And(Annotate.t((t, t)))
+      | Or(Annotate.t((t, t)));
   };
 
   module Create = {
     [@deriving sexp]
     type attr =
-      | Raw
-      | Suffix(Annotate.string);
+      | Raw(Annotate.unit)
+      | Suffix(Annotate.t(Annotate.string));
 
     [@deriving sexp]
-    type t = list(Annotate.t(attr));
+    type t = list(attr);
   };
 
   module Read = {
     [@deriving sexp]
     type kind =
-      | Has
-      | First
-      | One
-      | All
-      | Find
-      | Limited
-      | Paged;
+      | Has(Annotate.unit)
+      | First(Annotate.unit)
+      | One(Annotate.unit)
+      | All(Annotate.unit)
+      | Find(Annotate.unit)
+      | Limited(Annotate.unit)
+      | Paged(Annotate.unit);
 
     [@deriving sexp]
     type direction =
-      | Ascending
-      | Descending;
+      | Ascending(Annotate.unit)
+      | Descending(Annotate.unit);
 
     [@deriving sexp]
     type attr =
-      | Suffix(Annotate.string)
+      | Suffix(Annotate.t(Annotate.string))
       | OrderBy(Annotate.t(direction));
 
     [@deriving sexp]
-    type t = (Annotate.t(kind), option(Annotate.t(Query.t)), option(list(Annotate.t(attr))));
+    type t = (kind, option(Query.t), option(list(attr)));
   };
 
   module Update = {
     [@deriving sexp]
     type attr =
-      | Suffix(Annotate.string);
+      | Suffix(Annotate.t(Annotate.string));
 
     [@deriving sexp]
-    type t = (Annotate.t(Query.t), option(list(Annotate.t(attr))));
+    type t = (Query.t, option(list(attr)));
   };
 
   module Delete = {
     [@deriving sexp]
     type attr =
-      | Suffix(Annotate.string);
+      | Suffix(Annotate.t(Annotate.string));
 
     [@deriving sexp]
-    type t = (Annotate.t(Query.t), option(list(Annotate.t(attr))));
+    type t = (Query.t, option(list(attr)));
   };
 
   [@deriving sexp]
@@ -197,13 +204,13 @@ module Crud = {
 
   [@deriving sexp]
   type entry =
-    | Create(Create.t)
-    | Read(Read.t)
-    | Update(Update.t)
-    | Delete(Delete.t);
+    | Create(Annotate.t(Create.t))
+    | Read(Annotate.t(Read.t))
+    | Update(Annotate.t(Update.t))
+    | Delete(Annotate.t(Delete.t));
 
   [@deriving sexp]
-  type t = (model, list(Annotate.t(entry)));
+  type t = (model, list(entry));
 };
 
 [@deriving sexp]
