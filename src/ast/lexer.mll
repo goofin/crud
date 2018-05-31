@@ -152,17 +152,17 @@ rule token = parse
     | _       { lexing_error lexbuf }
 
 and read_quote buf = parse
-    | '\''            { emit (STRING (Buffer.contents buf)) }
-    | '\\' '\''       { Buffer.add_char buf '\''; read_quote buf lexbuf }
-    | '\\' '\\'       { Buffer.add_char buf '\\'; read_quote buf lexbuf }
-    | [^ '\'' '\\' ]+ { Buffer.add_string buf (Lexing.lexeme lexbuf); read_quote buf lexbuf }
-    | _               { lexing_error lexbuf }
-    | eof             { raise (Error ("EOF", lexbuf.Lexing.lex_curr_p)) }
+    | '\''                      { emit (STRING (Buffer.contents buf)) }
+    | '\\' '\''                 { Buffer.add_char buf '\''; read_quote buf lexbuf }
+    | '\\' '\\'                 { Buffer.add_char buf '\\'; read_quote buf lexbuf }
+    | [^ '\r' '\n' '\'' '\\' ]+ { Buffer.add_string buf (Lexing.lexeme lexbuf); read_quote buf lexbuf }
+    | _                         { lexing_error lexbuf }
+    | eof                       { raise (Error ("EOF", lexbuf.Lexing.lex_curr_p)) }
 
 and read_ident buf = parse
-    | '"'            { emit (IDENT (Buffer.contents buf)) }
-    | '\\' '"'       { Buffer.add_char buf '"';  read_ident buf lexbuf }
-    | '\\' '\\'      { Buffer.add_char buf '\\'; read_ident buf lexbuf }
-    | [^ '"' '\\' ]+ { Buffer.add_string buf (Lexing.lexeme lexbuf); read_ident buf lexbuf }
-    | _              { lexing_error lexbuf }
-    | eof            { raise (Error ("EOF", lexbuf.Lexing.lex_curr_p)) }
+    | '"'                      { emit (IDENT (Buffer.contents buf)) }
+    | '\\' '"'                 { Buffer.add_char buf '"';  read_ident buf lexbuf }
+    | '\\' '\\'                { Buffer.add_char buf '\\'; read_ident buf lexbuf }
+    | [^ '\r' '\n' '"' '\\' ]+ { Buffer.add_string buf (Lexing.lexeme lexbuf); read_ident buf lexbuf }
+    | _                        { lexing_error lexbuf }
+    | eof                      { raise (Error ("EOF", lexbuf.Lexing.lex_curr_p)) }
