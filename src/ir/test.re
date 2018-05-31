@@ -18,7 +18,6 @@ let nth_line = (file, line) =>
 
 let print_annotated = (depth, header, annotated) => {
   open Crud_ast.Syntax.Annotate;
-  printf("%s\n", annotated.loc |> Annotate.sexp_of_location |> Sexplib.Sexp.to_string_hum);
   let start_line = annotated.loc.start_line;
   let end_line = annotated.loc.end_line;
   let prefix = String.make(depth, '\t');

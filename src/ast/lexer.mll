@@ -124,9 +124,9 @@ rule token = parse
     | "paged"    { needs_comma := true;  emit PAGED }
     | "suffix"   { needs_comma := true;  emit SUFFIX }
     | "raw"      { needs_comma := true;  emit RAW }
-    | "orderby"  { needs_comma := true; emit ORDERBY }
-    | "asc"      { needs_comma := true; emit ASC }
-    | "desc"     { needs_comma := true; emit DESC }
+    | "orderby"  { needs_comma := true;  emit ORDERBY }
+    | "asc"      { needs_comma := true;  emit ASC }
+    | "desc"     { needs_comma := true;  emit DESC }
     | "noreturn" { needs_comma := true;  emit NORETURN }
     | "and"      { needs_comma := false; emit AND }
     | "or"       { needs_comma := false; emit OR }
@@ -134,8 +134,18 @@ rule token = parse
     (* some literals *)
     | number  { needs_comma := true;  emit (NUMBER (Lexing.lexeme lexbuf)) }
     | ident   { needs_comma := true;  emit (IDENT  (Lexing.lexeme lexbuf)) }
-    | '"'     { needs_comma := true;  read_ident (Buffer.create 16) lexbuf }
-    | '\''    { needs_comma := true;  read_quote (Buffer.create 16) lexbuf }
+    | '"'     { needs_comma := true;
+                let start = Lexing.lexeme_start_p lexbuf in
+                let ident = read_ident (Buffer.create 16) lexbuf in
+                lexbuf.lex_start_p <- start;
+                ident
+              }
+    | '\''    { needs_comma := true;
+                let start = Lexing.lexeme_start_p lexbuf in
+                let string = read_quote (Buffer.create 16) lexbuf in
+                lexbuf.lex_start_p <- start;
+                string
+              }
 
     (* eof *)
     | eof     { EOF }
