@@ -87,7 +87,31 @@
 %token EOF
 
 %start <Syntax.definition list> dbx
+
+%{
+let global_id = ref 0;;
+
+let annotate start_pos end_pos node =
+    let id        = !global_id in
+    global_id := id + 1;
+    { Syntax.Annotate.
+      node = node
+    ; id   = id
+    ; loc  = { file       = start_pos.Lexing.pos_fname
+             ; start_line = start_pos.Lexing.pos_lnum
+             ; start_pos  = start_pos.Lexing.pos_cnum - start_pos.Lexing.pos_bol
+             ; end_line   = end_pos.Lexing.pos_lnum
+             ; end_pos    = end_pos.Lexing.pos_cnum - end_pos.Lexing.pos_bol
+             }
+    }
+;;
+%}
+
 %%
+
+///////////////////////////////////////////////////////////////////////////////
+// helpers
+///////////////////////////////////////////////////////////////////////////////
 
 //
 // support for left recursive list that allows optional trailing delimiter
@@ -107,6 +131,25 @@ rev_sep_list(DELIM, X):
 %inline
 sep_list(DELIM, X):
   xs = rev_sep_list(DELIM, X) DELIM? { List.rev xs }
+
+//
+// annotation helpers
+//
+
+annotated_ident:
+    ident = IDENT
+    { annotate $startpos $endpos (ident) }
+    ;
+
+annotated_number:
+    number = NUMBER
+    { annotate $startpos $endpos (number) }
+    ;
+
+annotated_string:
+    string = STRING
+    { annotate $startpos $endpos (string) }
+    ;
 
 ///////////////////////////////////////////////////////////////////////////////
 // dbx
@@ -129,16 +172,11 @@ parse_definition:
 
 parse_model:
     MODEL
-    name = IDENT
-    entries = parse_model_entries
-    { Syntax.Model (name, entries) }
-    ;
-
-parse_model_entries:
+    name = annotated_ident
     LEFT_PAREN
     entries = sep_list(COMMA, parse_model_entry)
     RIGHT_PAREN
-    { entries }
+    { Syntax.Model (annotate $startpos $endpos (name, entries)) }
     ;
 
 parse_model_entry:
@@ -156,8 +194,8 @@ parse_model_entry:
 
 parse_model_table:
     TABLE
-    name = IDENT
-    { Syntax.Model.Table name }
+    name = annotated_ident
+    { Syntax.Model.Table (annotate $startpos $endpos (name)) }
     ;
 
 //
@@ -166,8 +204,8 @@ parse_model_table:
 
 parse_model_key:
     KEY
-    fields = list(IDENT)
-    { Syntax.Model.Key fields }
+    fields = list(annotated_ident)
+    { Syntax.Model.Key (annotate $startpos $endpos (fields)) }
     ;
 
 //
@@ -176,8 +214,8 @@ parse_model_key:
 
 parse_model_unique:
     UNIQUE
-    fields = list(IDENT)
-    { Syntax.Model.Unique fields }
+    fields = list(annotated_ident)
+    { Syntax.Model.Unique (annotate $startpos $endpos (fields)) }
     ;
 
 //
@@ -189,7 +227,7 @@ parse_model_index:
     LEFT_PAREN
     entries = sep_list(COMMA, parse_model_index_entry)
     RIGHT_PAREN
-    { Syntax.Model.Index entries }
+    { Syntax.Model.Index (annotate $startpos $endpos (entries)) }
     ;
 
 parse_model_index_entry:
@@ -200,19 +238,19 @@ parse_model_index_entry:
 
 parse_model_index_name:
     NAME
-    name = IDENT
-    { Syntax.Model.Index.Name name }
+    name = annotated_ident
+    { annotate $startpos $endpos (Syntax.Model.Index.Name name) }
     ;
 
 parse_model_index_fields:
     FIELDS
-    fields = list(IDENT)
-    { Syntax.Model.Index.Fields fields }
+    fields = list(annotated_ident)
+    { annotate $startpos $endpos (Syntax.Model.Index.Fields fields) }
     ;
 
 parse_model_index_unique:
     UNIQUE
-    { Syntax.Model.Index.Unique }
+    { annotate $startpos $endpos (Syntax.Model.Index.Unique) }
     ;
 
 //
@@ -221,27 +259,27 @@ parse_model_index_unique:
 
 parse_model_field:
     FIELD
-    name = IDENT
+    name = annotated_ident
     typ = parse_model_field_type
     attrs = option(parse_model_field_attrs)
-    { Syntax.Model.Field (name, typ, attrs) }
+    { Syntax.Model.Field (annotate $startpos $endpos (name, typ, attrs)) }
     ;
 
 parse_model_field_type:
-    | SERIAL     { Syntax.Model.Field.Serial }
-    | SERIAL64   { Syntax.Model.Field.Serial64 }
-    | INT        { Syntax.Model.Field.Int }
-    | INT64      { Syntax.Model.Field.Int64 }
-    | UINT       { Syntax.Model.Field.Uint }
-    | UINT64     { Syntax.Model.Field.Uint64 }
-    | BOOL       { Syntax.Model.Field.Bool }
-    | TEXT       { Syntax.Model.Field.Text }
-    | DATE       { Syntax.Model.Field.Date }
-    | TIMESTAMP  { Syntax.Model.Field.Timestamp }
-    | UTIMESTAMP { Syntax.Model.Field.Utimestamp }
-    | FLOAT      { Syntax.Model.Field.Float }
-    | FLOAT64    { Syntax.Model.Field.Float64 }
-    | BLOB       { Syntax.Model.Field.Blob }
+    | SERIAL     { annotate $startpos $endpos (Syntax.Model.Field.Serial) }
+    | SERIAL64   { annotate $startpos $endpos (Syntax.Model.Field.Serial64) }
+    | INT        { annotate $startpos $endpos (Syntax.Model.Field.Int) }
+    | INT64      { annotate $startpos $endpos (Syntax.Model.Field.Int64) }
+    | UINT       { annotate $startpos $endpos (Syntax.Model.Field.Uint) }
+    | UINT64     { annotate $startpos $endpos (Syntax.Model.Field.Uint64) }
+    | BOOL       { annotate $startpos $endpos (Syntax.Model.Field.Bool) }
+    | TEXT       { annotate $startpos $endpos (Syntax.Model.Field.Text) }
+    | DATE       { annotate $startpos $endpos (Syntax.Model.Field.Date) }
+    | TIMESTAMP  { annotate $startpos $endpos (Syntax.Model.Field.Timestamp) }
+    | UTIMESTAMP { annotate $startpos $endpos (Syntax.Model.Field.Utimestamp) }
+    | FLOAT      { annotate $startpos $endpos (Syntax.Model.Field.Float) }
+    | FLOAT64    { annotate $startpos $endpos (Syntax.Model.Field.Float64) }
+    | BLOB       { annotate $startpos $endpos (Syntax.Model.Field.Blob) }
     ;
 
 parse_model_field_attrs:
@@ -252,29 +290,29 @@ parse_model_field_attrs:
     ;
 
 parse_model_field_attr:
-    | COLUMN name = IDENT    { Syntax.Model.Field.Column name }
-    | NULLABLE               { Syntax.Model.Field.Nullable }
-    | UPDATABLE              { Syntax.Model.Field.Updatable }
-    | AUTOINSERT             { Syntax.Model.Field.Autoinsert }
-    | AUTOUPDATE             { Syntax.Model.Field.Autoupdate }
-    | LENGTH length = NUMBER { Syntax.Model.Field.Length length }
+    | COLUMN name = annotated_ident    { annotate $startpos $endpos (Syntax.Model.Field.Column name) }
+    | NULLABLE                         { annotate $startpos $endpos (Syntax.Model.Field.Nullable) }
+    | UPDATABLE                        { annotate $startpos $endpos (Syntax.Model.Field.Updatable) }
+    | AUTOINSERT                       { annotate $startpos $endpos (Syntax.Model.Field.Autoinsert) }
+    | AUTOUPDATE                       { annotate $startpos $endpos (Syntax.Model.Field.Autoupdate) }
+    | LENGTH length = annotated_number { annotate $startpos $endpos (Syntax.Model.Field.Length length) }
     ;
 
 parse_model_rel:
     FIELD
-    name = IDENT
-    model = IDENT
+    name = annotated_ident
+    model = annotated_ident
     DOT
-    field = IDENT
+    field = annotated_ident
     kind = parse_model_rel_kind
     attrs = option(parse_model_rel_attrs)
-    { Syntax.Model.Rel (name, model, field, kind, attrs) }
+    { Syntax.Model.Rel (annotate $startpos $endpos (name, model, field, kind, attrs)) }
     ;
 
 parse_model_rel_kind:
-    | SETNULL  { Syntax.Model.Rel.Setnull }
-    | CASCADE  { Syntax.Model.Rel.Cascade }
-    | RESTRICT { Syntax.Model.Rel.Restrict }
+    | SETNULL  { annotate $startpos $endpos (Syntax.Model.Rel.Setnull) }
+    | CASCADE  { annotate $startpos $endpos (Syntax.Model.Rel.Cascade) }
+    | RESTRICT { annotate $startpos $endpos (Syntax.Model.Rel.Restrict) }
     ;
 
 parse_model_rel_attrs:
@@ -285,9 +323,9 @@ parse_model_rel_attrs:
     ;
 
 parse_model_rel_attr:
-    | COLUMN name = IDENT { Syntax.Model.Rel.Column name }
-    | NULLABLE            { Syntax.Model.Rel.Nullable }
-    | UPDATABLE           { Syntax.Model.Rel.Updatable }
+    | COLUMN name = annotated_ident { annotate $startpos $endpos (Syntax.Model.Rel.Column name) }
+    | NULLABLE                      { annotate $startpos $endpos (Syntax.Model.Rel.Nullable) }
+    | UPDATABLE                     { annotate $startpos $endpos (Syntax.Model.Rel.Updatable) }
     ;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -296,9 +334,14 @@ parse_model_rel_attr:
 
 parse_crud:
     CRUD
-    name = IDENT
+    name = annotated_ident
     entries = parse_crud_entries
-    { Syntax.Crud (name, entries) }
+    { Syntax.Crud (annotate $startpos $endpos (name, entries)) }
+    ;
+
+parse_crud_attrs_optional(inner):
+    attrs = parse_crud_attrs(inner)
+    { annotate $startpos $endpos (attrs) }
     ;
 
 parse_crud_attrs(inner):
@@ -328,15 +371,13 @@ parse_crud_entry:
 
 parse_crud_create:
     CREATE
-    LEFT_PAREN
     attrs = parse_crud_attrs(parse_crud_create_attr)
-    RIGHT_PAREN
-    { Syntax.Crud.Create attrs }
+    { annotate $startpos $endpos (Syntax.Crud.Create attrs) }
     ;
 
 parse_crud_create_attr:
-    | RAW                   { Syntax.Crud.Create.Raw }
-    | SUFFIX suffix = IDENT { Syntax.Crud.Create.Suffix suffix }
+    | RAW                             { annotate $startpos $endpos (Syntax.Crud.Create.Raw) }
+    | SUFFIX suffix = annotated_ident { annotate $startpos $endpos (Syntax.Crud.Create.Suffix suffix) }
 
 //
 // crud read
@@ -351,7 +392,7 @@ parse_crud_read_noquery:
     READ
     kind = parse_crud_read_kind
     attrs = option(parse_crud_attrs(parse_crud_read_attr))
-    { Syntax.Crud.Read (kind, None, attrs) }
+    { annotate $startpos $endpos (Syntax.Crud.Read (kind, None, attrs)) }
     ;
 
 parse_crud_read_query:
@@ -359,23 +400,38 @@ parse_crud_read_query:
     kind = parse_crud_read_kind
     query = parse_crud_query
     attrs = option(parse_crud_attrs(parse_crud_read_attr))
-    { Syntax.Crud.Read (kind, Some query, attrs) }
+    { annotate $startpos $endpos (Syntax.Crud.Read (kind, Some query, attrs)) }
     ;
 
 parse_crud_read_kind:
-    | HAS     { Syntax.Crud.Read.Has }
-    | FIRST   { Syntax.Crud.Read.First }
-    | ONE     { Syntax.Crud.Read.One }
-    | ALL     { Syntax.Crud.Read.All }
-    | FIND    { Syntax.Crud.Read.Find }
-    | LIMITED { Syntax.Crud.Read.Limited }
-    | PAGED   { Syntax.Crud.Read.Paged }
+    | HAS     { annotate $startpos $endpos (Syntax.Crud.Read.Has) }
+    | FIRST   { annotate $startpos $endpos (Syntax.Crud.Read.First) }
+    | ONE     { annotate $startpos $endpos (Syntax.Crud.Read.One) }
+    | ALL     { annotate $startpos $endpos (Syntax.Crud.Read.All) }
+    | FIND    { annotate $startpos $endpos (Syntax.Crud.Read.Find) }
+    | LIMITED { annotate $startpos $endpos (Syntax.Crud.Read.Limited) }
+    | PAGED   { annotate $startpos $endpos (Syntax.Crud.Read.Paged) }
 
 parse_crud_read_attr:
-    | ORDERBY ASC           { Syntax.Crud.Read.(OrderBy Ascending) }
-    | ORDERBY DESC          { Syntax.Crud.Read.(OrderBy Descending) }
-    | SUFFIX suffix = IDENT { Syntax.Crud.Read.Suffix suffix }
-    ;    
+    | orderby = parse_crud_read_attr_orderby { orderby }
+    | suffix  = parse_crud_read_attr_suffix  { suffix }
+
+parse_crud_read_attr_orderby:
+    ORDERBY
+    direction = parse_crud_read_attr_orderby_direction
+    { annotate $startpos $endpos (Syntax.Crud.Read.OrderBy direction) }
+    ;
+
+parse_crud_read_attr_orderby_direction:
+    | ASC  { annotate $startpos $endpos (Syntax.Crud.Read.Ascending) }
+    | DESC { annotate $startpos $endpos (Syntax.Crud.Read.Descending) }
+    ;
+
+parse_crud_read_attr_suffix:
+    SUFFIX
+    suffix = annotated_ident
+    { annotate $startpos $endpos (Syntax.Crud.Read.Suffix suffix) }
+    ;
 
 //
 // crud update
@@ -385,12 +441,12 @@ parse_crud_update:
     UPDATE
     query = parse_crud_query
     attrs = option(parse_crud_attrs(parse_crud_update_attr))
-    { Syntax.Crud.Update (query, attrs) }
+    { annotate $startpos $endpos (Syntax.Crud.Update (query, attrs)) }
     ;
 
 parse_crud_update_attr:
-    | SUFFIX suffix = IDENT { Syntax.Crud.Update.Suffix suffix }
-    ;    
+    | SUFFIX suffix = annotated_ident { annotate $startpos $endpos (Syntax.Crud.Update.Suffix suffix) }
+    ;
 
 //
 // crud delete
@@ -400,11 +456,11 @@ parse_crud_delete:
     DELETE
     query = parse_crud_query
     attrs = option(parse_crud_attrs(parse_crud_delete_attr))
-    { Syntax.Crud.Delete (query, attrs) }
+    { annotate $startpos $endpos (Syntax.Crud.Delete (query, attrs)) }
     ;
 
 parse_crud_delete_attr:
-    | SUFFIX suffix = IDENT { Syntax.Crud.Delete.Suffix suffix }
+    | SUFFIX suffix = annotated_ident { annotate $startpos $endpos (Syntax.Crud.Delete.Suffix suffix) }
     ;
 
 //
@@ -429,56 +485,56 @@ parse_crud_query_term:
     left = parse_crud_query_value
     op = parse_crud_query_op
     right = parse_crud_query_value
-    { Syntax.Crud.Query.Term (left, op, right) }
+    { annotate $startpos $endpos (Syntax.Crud.Query.Term (left, op, right)) }
     ;
 
 parse_crud_query_op:
-    | NOT_EQUAL             { Syntax.Crud.Query.NotEqual }
-    | LESS_THAN             { Syntax.Crud.Query.LessThan }
-    | LESS_THAN_OR_EQUAL    { Syntax.Crud.Query.LessThanOrEqual }
-    | GREATER_THAN          { Syntax.Crud.Query.GreaterThan }
-    | GREATER_THAN_OR_EQUAL { Syntax.Crud.Query.GreaterThanOrEqual }
-    | EQUAL                 { Syntax.Crud.Query.Equal }
-    | IN                    { Syntax.Crud.Query.In }
+    | NOT_EQUAL             { annotate $startpos $endpos (Syntax.Crud.Query.NotEqual) }
+    | LESS_THAN             { annotate $startpos $endpos (Syntax.Crud.Query.LessThan) }
+    | LESS_THAN_OR_EQUAL    { annotate $startpos $endpos (Syntax.Crud.Query.LessThanOrEqual) }
+    | GREATER_THAN          { annotate $startpos $endpos (Syntax.Crud.Query.GreaterThan) }
+    | GREATER_THAN_OR_EQUAL { annotate $startpos $endpos (Syntax.Crud.Query.GreaterThanOrEqual) }
+    | EQUAL                 { annotate $startpos $endpos (Syntax.Crud.Query.Equal) }
+    | IN                    { annotate $startpos $endpos (Syntax.Crud.Query.In) }
     ;
 
 parse_crud_query_value:
-    | QUESTION                              { Syntax.Crud.Query.Placeholder }
-    | number = NUMBER                       { Syntax.Crud.Query.Literal number }
-    | string = STRING                       { Syntax.Crud.Query.Literal string }
-    | DOT field = IDENT                     { Syntax.Crud.Query.Field field }
+    | QUESTION                              { annotate $startpos $endpos (Syntax.Crud.Query.Placeholder) }
+    | number = annotated_number             { annotate $startpos $endpos (Syntax.Crud.Query.Literal number) }
+    | string = annotated_string             { annotate $startpos $endpos (Syntax.Crud.Query.Literal string) }
+    | DOT field = annotated_ident           { annotate $startpos $endpos (Syntax.Crud.Query.Field field) }
     | call    = parse_crud_query_value_call { call }
     | join    = parse_crud_query_value_join { join }
     ;
 
 parse_crud_query_value_call:
-    func = IDENT
+    func = annotated_ident
     LEFT_PAREN
     arg = parse_crud_query_value
     RIGHT_PAREN
-    { Syntax.Crud.Query.Call (func, arg) }
+    { annotate $startpos $endpos (Syntax.Crud.Query.Call (func, arg)) }
     ;
 
 parse_crud_query_value_join:
-    model = IDENT
+    model = annotated_ident
     LEFT_PAREN
     query = parse_crud_query
     RIGHT_PAREN
     DOT
-    field = IDENT
-    { Syntax.Crud.Query.Join (model, query, field) }
+    field = annotated_ident
+    { annotate $startpos $endpos (Syntax.Crud.Query.Join (model, query, field)) }
     ;
 
 parse_crud_query_and:
     left = parse_crud_query
     AND
     right = parse_crud_query
-    { Syntax.Crud.Query.And (left, right) }
+    { annotate $startpos $endpos (Syntax.Crud.Query.And (left, right)) }
     ;
 
 parse_crud_query_or:
     left = parse_crud_query
     OR
     right = parse_crud_query
-    { Syntax.Crud.Query.Or (left, right) }
+    { annotate $startpos $endpos (Syntax.Crud.Query.Or (left, right)) }
     ;

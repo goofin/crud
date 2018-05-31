@@ -106,6 +106,7 @@ let print_error = error => {
     };
   };
 };
+
 let dbx = Parser.Incremental.dbx;
 
 let parse = (parse_fun, lexbuf) => {
@@ -126,14 +127,7 @@ let parse = (parse_fun, lexbuf) => {
     | _ => assert(false)
     };
 
-  try (
-    Interp.loop_handle(
-      success,
-      failure,
-      input,
-      parse_fun(lexbuf.Lexing.lex_curr_p),
-    )
-  ) {
+  try (Interp.loop_handle(success, failure, input, parse_fun(lexbuf.Lexing.lex_curr_p))) {
   | Lexer.Error(input, pos) => Core.Error(Lexing(input, pos))
   };
 };
@@ -149,12 +143,7 @@ let parse_file = (parse_fun, path) => {
     let lexbuf = {
       open Lexing;
       let lexbuf = from_channel(chan);
-      lexbuf.lex_start_p = {
-        pos_fname: path,
-        pos_lnum: 1,
-        pos_bol: 0,
-        pos_cnum: 0,
-      };
+      lexbuf.lex_start_p = {pos_fname: path, pos_lnum: 1, pos_bol: 0, pos_cnum: 0};
       lexbuf.lex_curr_p = lexbuf.lex_start_p;
       lexbuf;
     };

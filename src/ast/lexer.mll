@@ -134,8 +134,8 @@ rule token = parse
     (* some literals *)
     | number  { needs_comma := true;  emit (NUMBER (Lexing.lexeme lexbuf)) }
     | ident   { needs_comma := true;  emit (IDENT  (Lexing.lexeme lexbuf)) }
-    | '"'     { needs_comma := true;  read_ident (Buffer.create 0) lexbuf }
-    | '\''    { needs_comma := true;  read_quote (Buffer.create 0) lexbuf }
+    | '"'     { needs_comma := true;  read_ident (Buffer.create 16) lexbuf }
+    | '\''    { needs_comma := true;  read_quote (Buffer.create 16) lexbuf }
 
     (* eof *)
     | eof     { EOF }
@@ -146,13 +146,13 @@ and read_quote buf = parse
     | '\\' '\''       { Buffer.add_char buf '\''; read_quote buf lexbuf }
     | '\\' '\\'       { Buffer.add_char buf '\\'; read_quote buf lexbuf }
     | [^ '\'' '\\' ]+ { Buffer.add_string buf (Lexing.lexeme lexbuf); read_quote buf lexbuf }
-    | _   { lexing_error lexbuf }
-    | eof { raise (Error ("EOF", lexbuf.Lexing.lex_curr_p)) }
+    | _               { lexing_error lexbuf }
+    | eof             { raise (Error ("EOF", lexbuf.Lexing.lex_curr_p)) }
 
 and read_ident buf = parse
     | '"'            { emit (IDENT (Buffer.contents buf)) }
     | '\\' '"'       { Buffer.add_char buf '"';  read_ident buf lexbuf }
     | '\\' '\\'      { Buffer.add_char buf '\\'; read_ident buf lexbuf }
     | [^ '"' '\\' ]+ { Buffer.add_string buf (Lexing.lexeme lexbuf); read_ident buf lexbuf }
-    | _   { lexing_error lexbuf }
-    | eof { raise (Error ("EOF", lexbuf.Lexing.lex_curr_p)) }
+    | _              { lexing_error lexbuf }
+    | eof            { raise (Error ("EOF", lexbuf.Lexing.lex_curr_p)) }
