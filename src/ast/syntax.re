@@ -1,74 +1,78 @@
 open Core;
 
+type ann('t) = Annotate.t('t);
+type aunit = ann(unit);
+type astring = ann(string);
+
 module Model = {
   module Index = {
     type entry =
-      | Name(Annotate.t(Annotate.t(string)))
-      | Fields(Annotate.t(list(Annotate.t(string))))
-      | Unique(Annotate.t(unit));
+      | Name(ann(astring))
+      | Fields(ann(list(astring)))
+      | Unique(aunit);
 
     type t = list(entry);
   };
 
   module Field = {
-    type name = Annotate.t(string);
+    type name = astring;
 
     type type_ =
-      | Serial(Annotate.t(unit))
-      | Serial64(Annotate.t(unit))
-      | Int(Annotate.t(unit))
-      | Int64(Annotate.t(unit))
-      | Uint(Annotate.t(unit))
-      | Uint64(Annotate.t(unit))
-      | Bool(Annotate.t(unit))
-      | Text(Annotate.t(unit))
-      | Date(Annotate.t(unit))
-      | Timestamp(Annotate.t(unit))
-      | Utimestamp(Annotate.t(unit))
-      | Float(Annotate.t(unit))
-      | Float64(Annotate.t(unit))
-      | Blob(Annotate.t(unit));
+      | Serial(aunit)
+      | Serial64(aunit)
+      | Int(aunit)
+      | Int64(aunit)
+      | Uint(aunit)
+      | Uint64(aunit)
+      | Bool(aunit)
+      | Text(aunit)
+      | Date(aunit)
+      | Timestamp(aunit)
+      | Utimestamp(aunit)
+      | Float(aunit)
+      | Float64(aunit)
+      | Blob(aunit);
 
     type attr =
-      | Column(Annotate.t(Annotate.t(string)))
-      | Nullable(Annotate.t(unit))
-      | Updatable(Annotate.t(unit))
-      | Autoinsert(Annotate.t(unit))
-      | Autoupdate(Annotate.t(unit))
-      | Length(Annotate.t(Annotate.t(string)));
+      | Column(ann(astring))
+      | Nullable(aunit)
+      | Updatable(aunit)
+      | Autoinsert(aunit)
+      | Autoupdate(aunit)
+      | Length(ann(astring));
 
     type t = (name, type_, option(list(attr)));
   };
 
   module Rel = {
-    type name = Annotate.t(string);
+    type name = astring;
 
-    type model = Annotate.t(string);
+    type model = astring;
 
-    type field = Annotate.t(string);
+    type field = astring;
 
     type kind =
-      | Setnull(Annotate.t(unit))
-      | Cascade(Annotate.t(unit))
-      | Restrict(Annotate.t(unit));
+      | Setnull(aunit)
+      | Cascade(aunit)
+      | Restrict(aunit);
 
     type attr =
-      | Column(Annotate.t(Annotate.t(string)))
-      | Nullable(Annotate.t(unit))
-      | Updatable(Annotate.t(unit));
+      | Column(ann(astring))
+      | Nullable(aunit)
+      | Updatable(aunit);
 
     type t = (name, model, field, kind, option(list(attr)));
   };
 
-  type name = Annotate.t(string);
+  type name = astring;
 
   type entry =
-    | Table(Annotate.t(Annotate.t(string)))
-    | Key(Annotate.t(list(Annotate.t(string))))
-    | Unique(Annotate.t(list(Annotate.t(string))))
-    | Index(Annotate.t(Index.t))
-    | Field(Annotate.t(Field.t))
-    | Rel(Annotate.t(Rel.t));
+    | Table(ann(astring))
+    | Key(ann(list(astring)))
+    | Unique(ann(list(astring)))
+    | Index(ann(Index.t))
+    | Field(ann(Field.t))
+    | Rel(ann(Rel.t));
 
   type t = (name, list(entry));
 };
@@ -76,80 +80,80 @@ module Model = {
 module Crud = {
   module Query = {
     type op =
-      | NotEqual(Annotate.t(unit))
-      | LessThan(Annotate.t(unit))
-      | LessThanOrEqual(Annotate.t(unit))
-      | GreaterThan(Annotate.t(unit))
-      | GreaterThanOrEqual(Annotate.t(unit))
-      | Equal(Annotate.t(unit))
-      | In(Annotate.t(unit));
+      | NotEqual(aunit)
+      | LessThan(aunit)
+      | LessThanOrEqual(aunit)
+      | GreaterThan(aunit)
+      | GreaterThanOrEqual(aunit)
+      | Equal(aunit)
+      | In(aunit);
 
     type value =
-      | Placeholder(Annotate.t(unit))
-      | Field(Annotate.t(Annotate.t(string)))
-      | Literal(Annotate.t(Annotate.t(string)))
-      | Call(Annotate.t((Annotate.t(string), value)))
-      | Join(Annotate.t((Annotate.t(string), t, Annotate.t(string))))
+      | Placeholder(aunit)
+      | Field(ann(astring))
+      | Literal(ann(astring))
+      | Call(ann((astring, value)))
+      | Join(ann((astring, t, astring)))
     and t =
-      | Term(Annotate.t((value, op, value)))
-      | And(Annotate.t((t, t)))
-      | Or(Annotate.t((t, t)));
+      | Term(ann((value, op, value)))
+      | And(ann((t, t)))
+      | Or(ann((t, t)));
   };
 
   module Create = {
     type attr =
-      | Raw(Annotate.t(unit))
-      | Suffix(Annotate.t(Annotate.t(string)));
+      | Raw(aunit)
+      | Suffix(ann(astring));
 
     type t = list(attr);
   };
 
   module Read = {
     type kind =
-      | Has(Annotate.t(unit))
-      | First(Annotate.t(unit))
-      | One(Annotate.t(unit))
-      | All(Annotate.t(unit))
-      | Find(Annotate.t(unit))
-      | Limited(Annotate.t(unit))
-      | Paged(Annotate.t(unit));
+      | Has(aunit)
+      | First(aunit)
+      | One(aunit)
+      | All(aunit)
+      | Find(aunit)
+      | Limited(aunit)
+      | Paged(aunit);
 
     type direction =
-      | Ascending(Annotate.t(unit))
-      | Descending(Annotate.t(unit));
+      | Ascending(aunit)
+      | Descending(aunit);
 
     type attr =
-      | Suffix(Annotate.t(Annotate.t(string)))
-      | OrderBy(Annotate.t(direction));
+      | Suffix(ann(astring))
+      | OrderBy(ann(direction));
 
     type t = (kind, option(Query.t), option(list(attr)));
   };
 
   module Update = {
     type attr =
-      | Suffix(Annotate.t(Annotate.t(string)));
+      | Suffix(ann(astring));
 
     type t = (Query.t, option(list(attr)));
   };
 
   module Delete = {
     type attr =
-      | Suffix(Annotate.t(Annotate.t(string)));
+      | Suffix(ann(astring));
 
     type t = (Query.t, option(list(attr)));
   };
 
-  type model = Annotate.t(string);
+  type model = astring;
 
   type entry =
-    | Create(Annotate.t(Create.t))
-    | Read(Annotate.t(Read.t))
-    | Update(Annotate.t(Update.t))
-    | Delete(Annotate.t(Delete.t));
+    | Create(ann(Create.t))
+    | Read(ann(Read.t))
+    | Update(ann(Update.t))
+    | Delete(ann(Delete.t));
 
   type t = (model, list(entry));
 };
 
 type definition =
-  | Model(Annotate.t(Model.t))
-  | Crud(Annotate.t(Crud.t));
+  | Model(ann(Model.t))
+  | Crud(ann(Crud.t));

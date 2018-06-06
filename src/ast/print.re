@@ -2,20 +2,35 @@ open Core;
 open Annotate;
 
 module Utils = {
-  let nth_line = (file, line) =>
-    if (line <= 0) {
-      None;
-    } else {
-      let read_lines = input => {
-        for (i in 1 to line - 1) {
-          ignore(In_channel.input_line(input));
-        };
-        In_channel.input_line(input);
+  module M = Map.Make(String);
+
+  let files = ref(M.empty);
+
+  let cache_file = file => {
+    let rec read_lines = (accum, input) =>
+      switch (In_channel.input_line(input)) {
+      | Some(line) => read_lines([line, ...accum], input)
+      | None => List.rev(accum)
       };
-      try (In_channel.with_file(file, ~f=read_lines)) {
-      | _ => None
+    let lines =
+      try (In_channel.with_file(file, ~f=read_lines([]))) {
+      | _ => []
       };
+    let result = Array.of_list(lines);
+    files := M.set(files^, file, result);
+    result;
+  };
+
+  let nth_line = (file, line) => {
+    let lines =
+      switch (M.find(files^, file)) {
+      | Some(lines) => lines
+      | None => cache_file(file)
+      };
+    try (Some(lines[line - 1])) {
+    | _ => None
     };
+  };
 
   let optionally_iter = (list, callback) =>
     switch (list) {
