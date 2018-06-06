@@ -92,9 +92,9 @@
 let global_id = ref 0;;
 
 let annotate start_pos end_pos node =
-    let id        = !global_id in
+    let id = !global_id in
     global_id := id + 1;
-    { Syntax.Annotate.
+    { Annotate.
       node = node
     ; id   = id
     ; loc  = { file       = start_pos.Lexing.pos_fname

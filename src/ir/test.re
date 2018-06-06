@@ -3,7 +3,7 @@ open Core;
 let loop = (filename, ()) =>
   Crud_ast.(
     switch (Parse.parse_file(Parse.dbx, filename)) {
-    | Ok(defs) => List.iter(defs, def => Crud_ast.Print.definition(def))
+    | Ok(defs) => List.iter(defs, def => Print.definition(def))
     | Error(err) => Parse.print_error(err)
     }
   );
