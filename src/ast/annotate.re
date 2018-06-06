@@ -1,6 +1,5 @@
 open Core;
 
-[@deriving sexp]
 type location = {
   file: string,
   start_line: int,
@@ -9,7 +8,6 @@ type location = {
   end_pos: int,
 };
 
-[@deriving sexp]
 type t('a) = {
   node: 'a,
   id: int,

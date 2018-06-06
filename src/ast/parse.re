@@ -2,8 +2,11 @@ open Core;
 
 type parse_error =
   | Lexing(string, Lexing.position)
-  | Parsing(option(message), Lexing.position, Lexing.position)
-and message = string;
+  | Parsing(option(string), Lexing.position, Lexing.position);
+
+type parser = Lexing.position => Parser.MenhirInterpreter.checkpoint(list(Syntax.definition));
+
+type t = Result.t(list(Syntax.definition), parse_error);
 
 let position = ({Lexing.pos_fname, pos_lnum, pos_cnum, pos_bol}) => {
   let file = pos_fname;
@@ -107,8 +110,6 @@ let print_error = error => {
   };
 };
 
-let dbx = Parser.Incremental.dbx;
-
 let parse = (parse_fun, lexbuf) => {
   module Interp = Parser.MenhirInterpreter;
   let input = Interp.lexer_lexbuf_to_supplier(Lexer.token, lexbuf);
@@ -149,5 +150,8 @@ let parse_file = (parse_fun, path) => {
     };
     parse(parse_fun, lexbuf);
   };
+
   with_file(path, ~f=handle);
 };
+
+let dbx: parser = Parser.Incremental.dbx;

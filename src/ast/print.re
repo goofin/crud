@@ -349,7 +349,7 @@ module Crud = {
   };
 };
 
-let rec definition =
+let definition =
   fun
   | Syntax.Model(model) => Model.print(model)
   | Syntax.Crud(crud) => Crud.print(crud);
