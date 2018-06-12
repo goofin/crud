@@ -14,7 +14,7 @@ let print =
       let first_same = first.start_line == first.end_line;
       let second_same = second.start_line == second.end_line;
       let all_same = first_same && second_same && first.start_line == second.start_line;
-      printf("duplicate %s:\n", kind);
+      printf("File %s, duplicate %s:\n", first.file, kind);
       print_endline("  first occurance:");
       Annotate.print_location(~context=2, ~highlight=true, first);
       print_endline("");
@@ -23,10 +23,10 @@ let print =
       Annotate.print_location(~context, ~highlight=true, second);
     }
   | Invalid(loc) => {
-      print_endline("invalid:");
+      printf("File %s, invalid:\n", loc.file);
       Annotate.print_location(~context=2, ~highlight=true, loc);
     }
   | Undefined(entity, loc) => {
-      printf("undefined %s:\n", entity);
+      printf("File %s, undefined %s:\n", loc.file, entity);
       Annotate.print_location(~context=2, ~highlight=true, loc);
     };
