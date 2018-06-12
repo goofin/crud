@@ -95,11 +95,6 @@ let annotate start_pos end_pos node =
         }
     }
 ;;
-
-let default def = function
-    | Some value -> value
-    | None -> def
-;;
 %}
 
 %%
@@ -144,6 +139,15 @@ annotated_number:
 annotated_string:
     string = STRING
     { annotate $startpos $endpos (string) }
+    ;
+
+//
+// bare and comma separated list helpers
+//
+
+parse_bare_or_list(X):
+    | LEFT_PAREN entries = sep_list(COMMA, X) RIGHT_PAREN { entries }
+    | entries = list(X)                                   { entries }
     ;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -203,7 +207,7 @@ parse_model_table:
 
 parse_model_key:
     KEY
-    fields = list(annotated_ident)
+    fields = parse_bare_or_list(annotated_ident)
     { annotate $startpos $endpos (Ast_syntax.Model.Key fields) }
     ;
 
@@ -213,7 +217,7 @@ parse_model_key:
 
 parse_model_unique:
     UNIQUE
-    fields = list(annotated_ident)
+    fields = parse_bare_or_list(annotated_ident)
     { annotate $startpos $endpos (Ast_syntax.Model.Unique fields) }
     ;
 
@@ -223,7 +227,7 @@ parse_model_unique:
 
 parse_model_index:
     INDEX
-    fields = list(annotated_ident)
+    fields = parse_bare_or_list(annotated_ident)
     { annotate $startpos $endpos (Ast_syntax.Model.Index fields) }
     ;
 
@@ -235,11 +239,11 @@ parse_model_field:
     FIELD
     name = annotated_ident
     type_ = parse_model_field_type
-    attrs = option(parse_model_field_attrs)
+    attrs = parse_bare_or_list(parse_model_field_attr)
     { annotate $startpos $endpos (Ast_syntax.Model.Field
         { Ast_syntax.Field.name
         ; type_
-        ; attrs = attrs |> default []
+        ; attrs
         })
     }
     ;
@@ -261,13 +265,6 @@ parse_model_field_type:
     | BLOB       { annotate $startpos $endpos (Ast_syntax.Field.Blob) }
     ;
 
-parse_model_field_attrs:
-    LEFT_PAREN
-    attrs = sep_list(COMMA, parse_model_field_attr)
-    RIGHT_PAREN
-    { attrs }
-    ;
-
 parse_model_field_attr:
     | COLUMN name = annotated_ident    { annotate $startpos $endpos (Ast_syntax.Field.Column name) }
     | NULLABLE                         { annotate $startpos $endpos (Ast_syntax.Field.Nullable) }
@@ -284,13 +281,13 @@ parse_model_rel:
     DOT
     field = annotated_ident
     kind = parse_model_rel_kind
-    attrs = option(parse_model_rel_attrs)
+    attrs = parse_bare_or_list(parse_model_rel_attr)
     { annotate $startpos $endpos (Ast_syntax.Model.Rel
         { Ast_syntax.Rel.name
         ; model
         ; field
         ; kind
-        ; attrs = attrs |> default []
+        ; attrs
         })
     }
     ;
@@ -299,13 +296,6 @@ parse_model_rel_kind:
     | SETNULL  { annotate $startpos $endpos (Ast_syntax.Rel.Setnull) }
     | CASCADE  { annotate $startpos $endpos (Ast_syntax.Rel.Cascade) }
     | RESTRICT { annotate $startpos $endpos (Ast_syntax.Rel.Restrict) }
-    ;
-
-parse_model_rel_attrs:
-    LEFT_PAREN
-    attrs = sep_list(COMMA, parse_model_rel_attr)
-    RIGHT_PAREN
-    { attrs }
     ;
 
 parse_model_rel_attr:
@@ -329,18 +319,6 @@ parse_crud:
     }
     ;
 
-parse_crud_attrs_optional(inner):
-    attrs = parse_crud_attrs(inner)
-    { annotate $startpos $endpos (attrs) }
-    ;
-
-parse_crud_attrs(inner):
-    LEFT_PAREN
-    attrs = sep_list(COMMA, inner)
-    RIGHT_PAREN
-    { attrs }
-    ;
-
 parse_crud_entries:
     LEFT_PAREN
     entries = sep_list(COMMA, parse_crud_entry)
@@ -361,7 +339,7 @@ parse_crud_entry:
 
 parse_crud_create:
     CREATE
-    attrs = parse_crud_attrs(parse_crud_create_attr)
+    attrs = parse_bare_or_list(parse_crud_create_attr)
     { annotate $startpos $endpos (Ast_syntax.Crud.Create
         { Ast_syntax.Create.attrs
         })
@@ -384,11 +362,11 @@ parse_crud_read:
 parse_crud_read_noquery:
     READ
     kind = parse_crud_read_kind
-    attrs = option(parse_crud_attrs(parse_crud_read_attr))
+    attrs = parse_bare_or_list(parse_crud_read_attr)
     { annotate $startpos $endpos (Ast_syntax.Crud.Read
         { Ast_syntax.Read.kind
         ; query = None
-        ; attrs = attrs |> default []
+        ; attrs
         })
     }
     ;
@@ -397,11 +375,11 @@ parse_crud_read_query:
     READ
     kind = parse_crud_read_kind
     query = parse_crud_query
-    attrs = option(parse_crud_attrs(parse_crud_read_attr))
+    attrs = parse_bare_or_list(parse_crud_read_attr)
     { annotate $startpos $endpos (Ast_syntax.Crud.Read
         { Ast_syntax.Read.kind
         ; query = Some query
-        ; attrs = attrs |> default []
+        ; attrs
         })
     }
     ;
@@ -444,10 +422,10 @@ parse_crud_read_attr_suffix:
 parse_crud_update:
     UPDATE
     query = parse_crud_query
-    attrs = option(parse_crud_attrs(parse_crud_update_attr))
+    attrs = parse_bare_or_list(parse_crud_update_attr)
     { annotate $startpos $endpos (Ast_syntax.Crud.Update
         { Ast_syntax.Update.query
-        ; attrs = attrs |> default []
+        ; attrs
         })
     }
 
@@ -464,10 +442,10 @@ parse_crud_update_attr:
 parse_crud_delete:
     DELETE
     query = parse_crud_query
-    attrs = option(parse_crud_attrs(parse_crud_delete_attr))
+    attrs = parse_bare_or_list(parse_crud_delete_attr)
     { annotate $startpos $endpos (Ast_syntax.Crud.Delete
         { Ast_syntax.Delete.query
-        ; attrs = attrs |> default []
+        ; attrs
         })
     }
     ;
