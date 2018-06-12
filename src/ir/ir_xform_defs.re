@@ -3,8 +3,8 @@ open Crud_ast;
 open Ir_xform_hashes;
 
 type field =
-  | Field(Syntax.Model.Field.t)
-  | Rel(Syntax.Model.Rel.t);
+  | Field(Syntax.Field.t)
+  | Rel(Syntax.Rel.t);
 
 type t = {
   models: StringHash.t(Syntax.Model.t),

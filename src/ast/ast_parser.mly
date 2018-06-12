@@ -237,7 +237,7 @@ parse_model_field:
     type_ = parse_model_field_type
     attrs = option(parse_model_field_attrs)
     { annotate $startpos $endpos (Ast_syntax.Model.Field
-        { Ast_syntax.Model.Field.name
+        { Ast_syntax.Field.name
         ; type_
         ; attrs = attrs |> default []
         })
@@ -245,20 +245,20 @@ parse_model_field:
     ;
 
 parse_model_field_type:
-    | SERIAL     { annotate $startpos $endpos (Ast_syntax.Model.Field.Serial) }
-    | SERIAL64   { annotate $startpos $endpos (Ast_syntax.Model.Field.Serial64) }
-    | INT        { annotate $startpos $endpos (Ast_syntax.Model.Field.Int) }
-    | INT64      { annotate $startpos $endpos (Ast_syntax.Model.Field.Int64) }
-    | UINT       { annotate $startpos $endpos (Ast_syntax.Model.Field.Uint) }
-    | UINT64     { annotate $startpos $endpos (Ast_syntax.Model.Field.Uint64) }
-    | BOOL       { annotate $startpos $endpos (Ast_syntax.Model.Field.Bool) }
-    | TEXT       { annotate $startpos $endpos (Ast_syntax.Model.Field.Text) }
-    | DATE       { annotate $startpos $endpos (Ast_syntax.Model.Field.Date) }
-    | TIMESTAMP  { annotate $startpos $endpos (Ast_syntax.Model.Field.Timestamp) }
-    | UTIMESTAMP { annotate $startpos $endpos (Ast_syntax.Model.Field.Utimestamp) }
-    | FLOAT      { annotate $startpos $endpos (Ast_syntax.Model.Field.Float) }
-    | FLOAT64    { annotate $startpos $endpos (Ast_syntax.Model.Field.Float64) }
-    | BLOB       { annotate $startpos $endpos (Ast_syntax.Model.Field.Blob) }
+    | SERIAL     { annotate $startpos $endpos (Ast_syntax.Field.Serial) }
+    | SERIAL64   { annotate $startpos $endpos (Ast_syntax.Field.Serial64) }
+    | INT        { annotate $startpos $endpos (Ast_syntax.Field.Int) }
+    | INT64      { annotate $startpos $endpos (Ast_syntax.Field.Int64) }
+    | UINT       { annotate $startpos $endpos (Ast_syntax.Field.Uint) }
+    | UINT64     { annotate $startpos $endpos (Ast_syntax.Field.Uint64) }
+    | BOOL       { annotate $startpos $endpos (Ast_syntax.Field.Bool) }
+    | TEXT       { annotate $startpos $endpos (Ast_syntax.Field.Text) }
+    | DATE       { annotate $startpos $endpos (Ast_syntax.Field.Date) }
+    | TIMESTAMP  { annotate $startpos $endpos (Ast_syntax.Field.Timestamp) }
+    | UTIMESTAMP { annotate $startpos $endpos (Ast_syntax.Field.Utimestamp) }
+    | FLOAT      { annotate $startpos $endpos (Ast_syntax.Field.Float) }
+    | FLOAT64    { annotate $startpos $endpos (Ast_syntax.Field.Float64) }
+    | BLOB       { annotate $startpos $endpos (Ast_syntax.Field.Blob) }
     ;
 
 parse_model_field_attrs:
@@ -269,12 +269,12 @@ parse_model_field_attrs:
     ;
 
 parse_model_field_attr:
-    | COLUMN name = annotated_ident    { annotate $startpos $endpos (Ast_syntax.Model.Field.Column name) }
-    | NULLABLE                         { annotate $startpos $endpos (Ast_syntax.Model.Field.Nullable) }
-    | UPDATABLE                        { annotate $startpos $endpos (Ast_syntax.Model.Field.Updatable) }
-    | AUTOINSERT                       { annotate $startpos $endpos (Ast_syntax.Model.Field.Autoinsert) }
-    | AUTOUPDATE                       { annotate $startpos $endpos (Ast_syntax.Model.Field.Autoupdate) }
-    | LENGTH length = annotated_number { annotate $startpos $endpos (Ast_syntax.Model.Field.Length length) }
+    | COLUMN name = annotated_ident    { annotate $startpos $endpos (Ast_syntax.Field.Column name) }
+    | NULLABLE                         { annotate $startpos $endpos (Ast_syntax.Field.Nullable) }
+    | UPDATABLE                        { annotate $startpos $endpos (Ast_syntax.Field.Updatable) }
+    | AUTOINSERT                       { annotate $startpos $endpos (Ast_syntax.Field.Autoinsert) }
+    | AUTOUPDATE                       { annotate $startpos $endpos (Ast_syntax.Field.Autoupdate) }
+    | LENGTH length = annotated_number { annotate $startpos $endpos (Ast_syntax.Field.Length length) }
     ;
 
 parse_model_rel:
@@ -286,7 +286,7 @@ parse_model_rel:
     kind = parse_model_rel_kind
     attrs = option(parse_model_rel_attrs)
     { annotate $startpos $endpos (Ast_syntax.Model.Rel
-        { Ast_syntax.Model.Rel.name
+        { Ast_syntax.Rel.name
         ; model
         ; field
         ; kind
@@ -296,9 +296,9 @@ parse_model_rel:
     ;
 
 parse_model_rel_kind:
-    | SETNULL  { annotate $startpos $endpos (Ast_syntax.Model.Rel.Setnull) }
-    | CASCADE  { annotate $startpos $endpos (Ast_syntax.Model.Rel.Cascade) }
-    | RESTRICT { annotate $startpos $endpos (Ast_syntax.Model.Rel.Restrict) }
+    | SETNULL  { annotate $startpos $endpos (Ast_syntax.Rel.Setnull) }
+    | CASCADE  { annotate $startpos $endpos (Ast_syntax.Rel.Cascade) }
+    | RESTRICT { annotate $startpos $endpos (Ast_syntax.Rel.Restrict) }
     ;
 
 parse_model_rel_attrs:
@@ -309,9 +309,9 @@ parse_model_rel_attrs:
     ;
 
 parse_model_rel_attr:
-    | COLUMN name = annotated_ident { annotate $startpos $endpos (Ast_syntax.Model.Rel.Column name) }
-    | NULLABLE                      { annotate $startpos $endpos (Ast_syntax.Model.Rel.Nullable) }
-    | UPDATABLE                     { annotate $startpos $endpos (Ast_syntax.Model.Rel.Updatable) }
+    | COLUMN name = annotated_ident { annotate $startpos $endpos (Ast_syntax.Rel.Column name) }
+    | NULLABLE                      { annotate $startpos $endpos (Ast_syntax.Rel.Nullable) }
+    | UPDATABLE                     { annotate $startpos $endpos (Ast_syntax.Rel.Updatable) }
     ;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -363,14 +363,14 @@ parse_crud_create:
     CREATE
     attrs = parse_crud_attrs(parse_crud_create_attr)
     { annotate $startpos $endpos (Ast_syntax.Crud.Create
-        { Ast_syntax.Crud.Create.attrs
+        { Ast_syntax.Create.attrs
         })
     }
     ;
 
 parse_crud_create_attr:
-    | RAW                             { annotate $startpos $endpos (Ast_syntax.Crud.Create.Raw) }
-    | SUFFIX suffix = annotated_ident { annotate $startpos $endpos (Ast_syntax.Crud.Create.Suffix suffix) }
+    | RAW                             { annotate $startpos $endpos (Ast_syntax.Create.Raw) }
+    | SUFFIX suffix = annotated_ident { annotate $startpos $endpos (Ast_syntax.Create.Suffix suffix) }
 
 //
 // crud read
@@ -386,7 +386,7 @@ parse_crud_read_noquery:
     kind = parse_crud_read_kind
     attrs = option(parse_crud_attrs(parse_crud_read_attr))
     { annotate $startpos $endpos (Ast_syntax.Crud.Read
-        { Ast_syntax.Crud.Read.kind
+        { Ast_syntax.Read.kind
         ; query = None
         ; attrs = attrs |> default []
         })
@@ -399,7 +399,7 @@ parse_crud_read_query:
     query = parse_crud_query
     attrs = option(parse_crud_attrs(parse_crud_read_attr))
     { annotate $startpos $endpos (Ast_syntax.Crud.Read
-        { Ast_syntax.Crud.Read.kind
+        { Ast_syntax.Read.kind
         ; query = Some query
         ; attrs = attrs |> default []
         })
@@ -407,13 +407,13 @@ parse_crud_read_query:
     ;
 
 parse_crud_read_kind:
-    | HAS     { annotate $startpos $endpos (Ast_syntax.Crud.Read.Has) }
-    | FIRST   { annotate $startpos $endpos (Ast_syntax.Crud.Read.First) }
-    | ONE     { annotate $startpos $endpos (Ast_syntax.Crud.Read.One) }
-    | ALL     { annotate $startpos $endpos (Ast_syntax.Crud.Read.All) }
-    | FIND    { annotate $startpos $endpos (Ast_syntax.Crud.Read.Find) }
-    | LIMITED { annotate $startpos $endpos (Ast_syntax.Crud.Read.Limited) }
-    | PAGED   { annotate $startpos $endpos (Ast_syntax.Crud.Read.Paged) }
+    | HAS     { annotate $startpos $endpos (Ast_syntax.Read.Has) }
+    | FIRST   { annotate $startpos $endpos (Ast_syntax.Read.First) }
+    | ONE     { annotate $startpos $endpos (Ast_syntax.Read.One) }
+    | ALL     { annotate $startpos $endpos (Ast_syntax.Read.All) }
+    | FIND    { annotate $startpos $endpos (Ast_syntax.Read.Find) }
+    | LIMITED { annotate $startpos $endpos (Ast_syntax.Read.Limited) }
+    | PAGED   { annotate $startpos $endpos (Ast_syntax.Read.Paged) }
 
 parse_crud_read_attr:
     | orderby = parse_crud_read_attr_orderby { orderby }
@@ -422,19 +422,19 @@ parse_crud_read_attr:
 parse_crud_read_attr_orderby:
     ORDERBY
     direction = parse_crud_read_attr_orderby_direction
-    { annotate $startpos $endpos (Ast_syntax.Crud.Read.OrderBy direction) }
+    { annotate $startpos $endpos (Ast_syntax.Read.OrderBy direction) }
     ;
 
 %inline
 parse_crud_read_attr_orderby_direction:
-    | ASC  { Ast_syntax.Crud.Read.Ascending }
-    | DESC { Ast_syntax.Crud.Read.Descending }
+    | ASC  { Ast_syntax.Read.Ascending }
+    | DESC { Ast_syntax.Read.Descending }
     ;
 
 parse_crud_read_attr_suffix:
     SUFFIX
     suffix = annotated_ident
-    { annotate $startpos $endpos (Ast_syntax.Crud.Read.Suffix suffix) }
+    { annotate $startpos $endpos (Ast_syntax.Read.Suffix suffix) }
     ;
 
 //
@@ -446,7 +446,7 @@ parse_crud_update:
     query = parse_crud_query
     attrs = option(parse_crud_attrs(parse_crud_update_attr))
     { annotate $startpos $endpos (Ast_syntax.Crud.Update
-        { Ast_syntax.Crud.Update.query
+        { Ast_syntax.Update.query
         ; attrs = attrs |> default []
         })
     }
@@ -454,7 +454,7 @@ parse_crud_update:
     ;
 
 parse_crud_update_attr:
-    | SUFFIX suffix = annotated_ident { annotate $startpos $endpos (Ast_syntax.Crud.Update.Suffix suffix) }
+    | SUFFIX suffix = annotated_ident { annotate $startpos $endpos (Ast_syntax.Update.Suffix suffix) }
     ;
 
 //
@@ -466,14 +466,14 @@ parse_crud_delete:
     query = parse_crud_query
     attrs = option(parse_crud_attrs(parse_crud_delete_attr))
     { annotate $startpos $endpos (Ast_syntax.Crud.Delete
-        { Ast_syntax.Crud.Delete.query
+        { Ast_syntax.Delete.query
         ; attrs = attrs |> default []
         })
     }
     ;
 
 parse_crud_delete_attr:
-    | SUFFIX suffix = annotated_ident { annotate $startpos $endpos (Ast_syntax.Crud.Delete.Suffix suffix) }
+    | SUFFIX suffix = annotated_ident { annotate $startpos $endpos (Ast_syntax.Delete.Suffix suffix) }
     ;
 
 //
@@ -498,8 +498,8 @@ parse_crud_query_term:
     left_val = parse_crud_query_value
     op = parse_crud_query_op
     right_val = parse_crud_query_value
-    { annotate $startpos $endpos (Ast_syntax.Crud.Query.Term
-        { Ast_syntax.Crud.Query.left_val
+    { annotate $startpos $endpos (Ast_syntax.Query.Term
+        { Ast_syntax.Query.left_val
         ; op
         ; right_val
         })
@@ -507,20 +507,20 @@ parse_crud_query_term:
     ;
 
 parse_crud_query_op:
-    | NOT_EQUAL             { annotate $startpos $endpos (Ast_syntax.Crud.Query.NotEqual) }
-    | LESS_THAN             { annotate $startpos $endpos (Ast_syntax.Crud.Query.LessThan) }
-    | LESS_THAN_OR_EQUAL    { annotate $startpos $endpos (Ast_syntax.Crud.Query.LessThanOrEqual) }
-    | GREATER_THAN          { annotate $startpos $endpos (Ast_syntax.Crud.Query.GreaterThan) }
-    | GREATER_THAN_OR_EQUAL { annotate $startpos $endpos (Ast_syntax.Crud.Query.GreaterThanOrEqual) }
-    | EQUAL                 { annotate $startpos $endpos (Ast_syntax.Crud.Query.Equal) }
-    | IN                    { annotate $startpos $endpos (Ast_syntax.Crud.Query.In) }
+    | NOT_EQUAL             { annotate $startpos $endpos (Ast_syntax.Query.NotEqual) }
+    | LESS_THAN             { annotate $startpos $endpos (Ast_syntax.Query.LessThan) }
+    | LESS_THAN_OR_EQUAL    { annotate $startpos $endpos (Ast_syntax.Query.LessThanOrEqual) }
+    | GREATER_THAN          { annotate $startpos $endpos (Ast_syntax.Query.GreaterThan) }
+    | GREATER_THAN_OR_EQUAL { annotate $startpos $endpos (Ast_syntax.Query.GreaterThanOrEqual) }
+    | EQUAL                 { annotate $startpos $endpos (Ast_syntax.Query.Equal) }
+    | IN                    { annotate $startpos $endpos (Ast_syntax.Query.In) }
     ;
 
 parse_crud_query_value:
-    | QUESTION                                { annotate $startpos $endpos (Ast_syntax.Crud.Query.Placeholder) }
-    | number    = annotated_number            { annotate $startpos $endpos (Ast_syntax.Crud.Query.Literal number) }
-    | string    = annotated_string            { annotate $startpos $endpos (Ast_syntax.Crud.Query.Literal string) }
-    | DOT field = annotated_ident             { annotate $startpos $endpos (Ast_syntax.Crud.Query.Field field) }
+    | QUESTION                                { annotate $startpos $endpos (Ast_syntax.Query.Placeholder) }
+    | number    = annotated_number            { annotate $startpos $endpos (Ast_syntax.Query.Literal number) }
+    | string    = annotated_string            { annotate $startpos $endpos (Ast_syntax.Query.Literal string) }
+    | DOT field = annotated_ident             { annotate $startpos $endpos (Ast_syntax.Query.Field field) }
     | call      = parse_crud_query_value_call { call }
     | join      = parse_crud_query_value_join { join }
     ;
@@ -530,7 +530,7 @@ parse_crud_query_value_call:
     LEFT_PAREN
     arg = parse_crud_query_value
     RIGHT_PAREN
-    { annotate $startpos $endpos (Ast_syntax.Crud.Query.Call (func, arg)) }
+    { annotate $startpos $endpos (Ast_syntax.Query.Call (func, arg)) }
     ;
 
 parse_crud_query_value_join:
@@ -540,15 +540,15 @@ parse_crud_query_value_join:
     RIGHT_PAREN
     DOT
     field = annotated_ident
-    { annotate $startpos $endpos (Ast_syntax.Crud.Query.Join (model, query, field)) }
+    { annotate $startpos $endpos (Ast_syntax.Query.Join (model, query, field)) }
     ;
 
 parse_crud_query_and:
     left_query = parse_crud_query
     AND
     right_query = parse_crud_query
-    { annotate $startpos $endpos (Ast_syntax.Crud.Query.And
-        { Ast_syntax.Crud.Query.left_query
+    { annotate $startpos $endpos (Ast_syntax.Query.And
+        { Ast_syntax.Query.left_query
         ; right_query
         })
     }
@@ -558,8 +558,8 @@ parse_crud_query_or:
     left_query = parse_crud_query
     OR
     right_query = parse_crud_query
-    { annotate $startpos $endpos (Ast_syntax.Crud.Query.Or
-        { Ast_syntax.Crud.Query.left_query
+    { annotate $startpos $endpos (Ast_syntax.Query.Or
+        { Ast_syntax.Query.left_query
         ; right_query
         })
     }

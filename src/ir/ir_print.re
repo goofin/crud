@@ -9,33 +9,33 @@ let dprintf = (~depth=0) => {
 
 let print_field = (~depth=0, field) =>
   switch (field^) {
-  | Ir_xform_transform.Field(field) =>
-    dprintf(~depth, "field: %s.%s\n", field.f_parent^.m_name, field.f_name)
+  | Ir_xform_transform.Model.Field(field) =>
+    dprintf(~depth, "field: %s.%s\n", field.parent^.name, field.name)
   | Rel(rel) =>
     let field_name =
-      switch (rel.r_field^) {
-      | Field({f_name}) => f_name
-      | Rel({r_name}) => r_name
+      switch (rel.field^) {
+      | Field({name}) => name
+      | Rel({name}) => name
       };
-    dprintf(~depth, "rel: %s.%s\n", rel.r_parent^.m_name, rel.r_name);
-    dprintf(~depth, "\tmodel: %s\n", rel.r_model^.m_name);
+    dprintf(~depth, "rel: %s.%s\n", rel.parent^.name, rel.name);
+    dprintf(~depth, "\tmodel: %s\n", rel.model^.name);
     dprintf(~depth, "\tfield: %s\n", field_name);
   };
 
 let print_model = (~depth=0, model) => {
-  dprintf(~depth, "model: %s\n", model^.Ir_xform_transform.m_name);
-  StringHash.iter(model^.m_fields, ~f=print_field(~depth=depth + 1));
+  dprintf(~depth, "model: %s\n", model^.Ir_xform_transform.Model.name);
+  StringHash.iter(model^.fields, ~f=print_field(~depth=depth + 1));
   dprintf(~depth=depth + 1, "key:\n");
-  List.iter(model^.m_key, ~f=print_field(~depth=depth + 2));
+  List.iter(model^.key, ~f=print_field(~depth=depth + 2));
   List.iter(
-    model^.m_unique,
+    model^.unique,
     ~f=unique => {
       dprintf(~depth=depth + 1, "unique:\n");
       List.iter(unique, ~f=print_field(~depth=depth + 2));
     },
   );
   List.iter(
-    model^.m_index,
+    model^.index,
     ~f=index => {
       dprintf(~depth=depth + 1, "index:\n");
       List.iter(index, ~f=print_field(~depth=depth + 2));
