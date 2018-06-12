@@ -1,17 +1,15 @@
 model a (
     key    pk
     unique id
-    unique "name"
-    index  (
-        fields ctime mtime
-        unique
-    )
+    unique name
+    unique ctime mtime
+    index  id name
 
     field pk     serial64
     field ctime  timestamp ( autoinsert )
     field mtime  timestamp ( autoinsert, autoupdate )
     field id     text
-    field "name" text
+    field name   text
 )
 
 model b (
@@ -97,9 +95,7 @@ crud users (
     update    .id = ?
     delete    .id = ?
 
-    read all   account(.id = ?).user_id = .id
+    read all account(.id = ?).user_id = .id
     read paged (orderby desc)
-    read all \
-        lower(."name") = lower(?) \
-        (suffix "by_name")
+    read all lower(.name) = lower(account(.id = ?).name)
 )

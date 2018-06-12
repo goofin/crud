@@ -1,5 +1,4 @@
-open Core;
-
+[@deriving (sexp, hash, compare)]
 type location = {
   file: string,
   start_line: int,
@@ -10,6 +9,7 @@ type location = {
 
 type t('a) = {
   node: 'a,
-  id: int,
   loc: location,
 };
+
+let print_location: (~depth: int=?, ~highlight: bool=?, ~context: int=?, location) => unit;

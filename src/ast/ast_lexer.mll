@@ -1,6 +1,6 @@
 {
 open Core
-open Parser
+open Ast_parser
 
 exception Error of string * Lexing.position
 
@@ -34,7 +34,7 @@ let white   = [' ' '\t']
 let newline = '\r' | '\n' | "\r\n"
 
 let number  = ['0'-'9']+
-let ident   = ['a'-'z' '_'] ['a'-'z' '_' '0'-'9']*
+let ident   = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '_' '0'-'9']*
 
 rule token = parse
     | white+ { token lexbuf }
@@ -74,11 +74,6 @@ rule token = parse
     | "unique" { needs_comma := true;  emit UNIQUE }
     | "index"  { needs_comma := true;  emit INDEX }
     | "field"  { needs_comma := true;  emit FIELD }
-
-    (* index *)
-    | "name"   { needs_comma := true;  emit NAME }
-    | "fields" { needs_comma := true;  emit FIELDS }
-    (* unique: already handled *)
 
     (* field types *)
     | "serial"     { needs_comma := true;  emit SERIAL }
