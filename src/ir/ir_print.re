@@ -43,7 +43,4 @@ let print_model = (~depth=0, model) => {
   );
 };
 
-let print = ({Ir_xform_transform.models, fields}) => {
-  StringHash.iter(models, ~f=print_model);
-  FieldHash.iter(fields, ~f=print_field);
-};
+let print = ({Ir_xform_transform.models, fields}) => StringHash.iter(models, ~f=print_model);

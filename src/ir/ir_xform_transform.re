@@ -4,6 +4,16 @@ open Ir_xform_hashes;
 
 include Ir_xform_transform_types;
 
+let check_duplicate_strings = strings => {
+  let seen = StringHash.create();
+  List.iter(strings, ~f=({Annotate.node, loc}) => {
+    switch(StringHash.find(seen, node)) {
+    | Some(prev_loc) => raise(Ir_error.Exn(Duplicate("value", prev_loc, loc)))
+    | None => StringHash.set(seen, node, loc)
+    }
+  })
+};
+
 let rec find_and_xform_field = (defs, t, model, field) =>
   switch (Ir_xform_defs.find_field(defs, model^.Model.name, field)) {
   | Field(field) => xform_field(defs, t, model, field)
@@ -19,7 +29,15 @@ and xform_model = (defs, t, model) => {
     let fields_set = Ir_xform_dupes.create("field");
 
     let model =
-      ref({Model.name, fields: StringHash.create(), table: None, key: [], unique: [], index: []});
+      ref({
+        Model.name,
+        fields: StringHash.create(),
+        table: None,
+        key: [],
+        unique: [],
+        index: [],
+        cruds: [],
+      });
     StringHash.set(t.models, name, model);
 
     List.iter(entries, ~f=({Annotate.loc, node}) =>
@@ -29,12 +47,15 @@ and xform_model = (defs, t, model) => {
         model := {...model^, table: Some(table.node)};
       | Key(key) =>
         Ir_xform_dupes.check(entries_set, "key", loc);
+        check_duplicate_strings(key);
         let fields = List.map(key, find_and_xform_field(defs, t, model));
         model := {...model^, key: fields};
       | Unique(unique) =>
+        check_duplicate_strings(unique);
         let fields = List.map(unique, find_and_xform_field(defs, t, model));
         model := {...model^, unique: [fields, ...model^.unique]};
       | Index(index) =>
+        check_duplicate_strings(index);
         let fields = List.map(index, find_and_xform_field(defs, t, model));
         model := {...model^, index: [fields, ...model^.index]};
       | Field({name: {node: field_name}} as field) =>
