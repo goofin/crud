@@ -90,7 +90,18 @@ model foo (
     field null_date date (nullable, updatable, autoupdate)
 )
 
-crud users (
+model user (
+    field id int
+    field name text
+)
+
+model account (
+    field id int
+    field user_id user.id cascade
+    field name text
+)
+
+crud user (
     read find .id = ?
     update    .id = ?
     delete    .id = ?
