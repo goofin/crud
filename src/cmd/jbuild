@@ -2,6 +2,6 @@
 
 (executable (
     (name test)
-    (libraries (core ppx_deriving crud_ast crud_ir))
-    (preprocess (pps (ppx_sexp_conv ppxlib.runner)))
+    (libraries (core crud_ast crud_ir))
+    (preprocess (pps (ppx_jane)))
 ))

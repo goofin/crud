@@ -3,6 +3,6 @@
 (library (
     (name crud_ir)
     (synopsis "Definitions and transformations to an IR form")
-    (libraries (core ppx_deriving ppx_jane crud_ast))
-    (preprocess (pps (ppx_jane ppxlib.runner)))
+    (libraries (core crud_ast))
+    (preprocess (pps (ppx_jane)))
 ))
