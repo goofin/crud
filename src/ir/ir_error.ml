@@ -22,7 +22,7 @@ let print =
     let context = if all_same then 0 else 2 in
     Annotate.print_location ~context ~highlight:true second
 
-  | Invalid loc -> 
+  | Invalid loc ->
     printf "File %s, invalid:\n" loc.file;
     Annotate.print_location ~context:2 ~highlight:true loc
 

@@ -12,9 +12,9 @@ type t =
   }
 
 let create defs =
-  let out = 
+  let out =
     { models = StringHash.create ()
-    ; fields = FieldHash.create () 
+    ; fields = FieldHash.create ()
     }
   in
 

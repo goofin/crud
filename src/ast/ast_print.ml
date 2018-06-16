@@ -98,7 +98,7 @@ module Query = struct
       print ~depth:(depth+1) and_.left_query.node;
       print_annotated ~depth "right_query" and_.right_query;
       print ~depth:(depth+1) and_.right_query.node
-    | Or or_ -> 
+    | Or or_ ->
       print_annotated ~depth "left_query" or_.left_query;
       print ~depth:(depth+1) or_.left_query.node;
       print_annotated ~depth "right_query" or_.right_query;
