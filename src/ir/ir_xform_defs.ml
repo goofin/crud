@@ -6,9 +6,9 @@ type field =
   | Field of Syntax.Field.t
   | Rel of Syntax.Rel.t
 
-type t = 
-  { models: Syntax.Model.t StringHash.t 
-  ;fields: field FieldHash.t 
+type t =
+  { models: Syntax.Model.t StringHash.t
+  ;fields: field FieldHash.t
   }
 
 let create defs =
@@ -18,33 +18,34 @@ let create defs =
     }
   in
 
-  let walk_model ({ Syntax.Model.name = { node = model }; entries } as node) =
-    StringHash.set out.models model node;
+  let walk_model ({ Syntax.Model.name = { node = model; _ }; entries } as node) =
+    StringHash.set out.models ~key:model ~data:node;
     List.iter entries ~f:(
-      fun { Annotate.loc = loc; node } ->
+      fun { Annotate.node; _ } ->
         match node with
-        | Field ({ name = { node = field } } as node) ->
-          FieldHash.set out.fields (model, field) (Field node)
-        | Rel ({ name = { node = rel } } as node) ->
-          FieldHash.set out.fields (model, rel) (Rel node)
+        | Field ({ name = { node = field; _ }; _ } as node) ->
+          FieldHash.set out.fields ~key:(model, field) ~data:(Field node)
+        | Rel ({ name = { node = rel; _ }; _ } as node) ->
+          FieldHash.set out.fields ~key:(model, rel) ~data:(Rel node)
         | Table _ | Key _ | Unique _ | Index _ -> ()
     )
   in
 
   List.iter defs ~f:(
-    fun { Annotate.loc = loc; node } ->
+    fun { Annotate.node; _ } ->
       match node with
       | Syntax.Model model -> walk_model model
-      | Syntax.Crud crud -> ()
+      | Syntax.Crud crud -> ignore crud
   );
   out
 
+let find (type key) (module Hash : Hashtbl.S with type key = key) hash kind key loc =
+  match Hash.find hash key with
+  | None -> raise (Ir_error.Exn (Undefined (kind, loc)))
+  | Some value -> value
+
 let find_model t { Annotate.node = model; loc } =
-  match StringHash.find t.models model with
-  | None -> raise (Ir_error.Exn (Undefined ("model", loc)))
-  | Some model -> model
+  find (module StringHash) t.models "model" model loc
 
 let find_field t model { Annotate.node = field; loc } =
-  match FieldHash.find t.fields (model, field) with
-  | None -> raise (Ir_error.Exn (Undefined ("field", loc)))
-  | Some field -> field
+  find (module FieldHash) t.fields "field" (model, field) loc

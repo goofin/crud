@@ -37,7 +37,7 @@ module Utils = struct
       | Some lines -> lines
       | None ->
         let lines = read_file file in
-        files := M.set !files file lines;
+        files := M.set !files ~key:file ~data:lines;
         lines
     in
 
@@ -45,7 +45,7 @@ module Utils = struct
     | _ -> None
 
   let fixtabs line =
-    String.concat_map line (fun ch ->
+    String.concat_map line ~f:(fun ch ->
         if ch = '\t' then
           "    "
         else

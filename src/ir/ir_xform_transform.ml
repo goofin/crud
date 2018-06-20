@@ -10,19 +10,21 @@ let check_duplicate_strings strings =
     fun { Annotate.node = node; loc } ->
       match StringHash.find seen node with
       | Some prev_loc -> raise @@ Ir_error.Exn (Duplicate ("value", prev_loc, loc))
-      | None -> StringHash.set seen node loc
+      | None -> StringHash.set seen ~key:node ~data:loc
   )
 
 let rec find_and_xform_field defs t model field =
   match Ir_xform_defs.find_field defs (!model).Model.name field with
-  | Field field -> xform_field defs t model field
+  | Field field -> xform_field t model field
   | Rel rel -> xform_rel defs t model rel
 
 and find_and_xform_model defs t model =
   xform_model defs t (Ir_xform_defs.find_model defs model)
 
 and xform_model defs t model =
-  let { Syntax.Model.name = { node = name }; entries } = model in
+  let { Syntax.Model.name = { node = name; _ }
+      ; entries
+      } = model in
 
   let model = lazy begin
     let entries_set = Ir_xform_dupes.create "model entry" in
@@ -37,7 +39,7 @@ and xform_model defs t model =
         ; index = []
         ; cruds = []
         } in
-    StringHash.set t.models name model;
+    StringHash.set t.models ~key:name ~data:model;
 
     List.iter entries ~f:(
       fun { Annotate.loc; node } ->
@@ -49,28 +51,28 @@ and xform_model defs t model =
         | Key key ->
           Ir_xform_dupes.check entries_set "key" loc;
           check_duplicate_strings key;
-          let fields = List.map key (find_and_xform_field defs t model) in
+          let fields = List.map key ~f:(find_and_xform_field defs t model) in
           model := { !model with key = fields }
 
         | Unique unique ->
           check_duplicate_strings unique;
-          let fields = List.map unique (find_and_xform_field defs t model) in
+          let fields = List.map unique ~f:(find_and_xform_field defs t model) in
           model := { !model with unique = fields :: !model.unique }
 
         | Index index ->
           check_duplicate_strings index;
-          let fields = List.map index (find_and_xform_field defs t model) in
+          let fields = List.map index ~f:(find_and_xform_field defs t model) in
           model := { !model with index = fields :: !model.index }
 
-        | Field ({ name = { node = field_name } } as field) ->
+        | Field ({ name = { node = field_name; _ }; _ } as field) ->
           Ir_xform_dupes.check fields_set field_name loc;
-          let field = xform_field defs t model field in
-          StringHash.set !model.fields field_name field
+          let field = xform_field t model field in
+          StringHash.set !model.fields ~key:field_name ~data:field
 
-        | Rel ({ name = { node = rel_name } } as rel) ->
+        | Rel ({ name = { node = rel_name; _ }; _ } as rel) ->
           Ir_xform_dupes.check fields_set rel_name loc;
           let rel = xform_rel defs t model rel in
-          StringHash.set !model.fields rel_name rel
+          StringHash.set !model.fields ~key:rel_name ~data:rel
     );
 
     model
@@ -80,8 +82,11 @@ and xform_model defs t model =
   | Some model -> model
   | None -> force model
 
-and xform_field defs t parent field =
-  let { Syntax.Field.name = { node = name }; type_ = { node = type_ }; attrs } = field in
+and xform_field t parent field =
+  let { Syntax.Field.name = { node = name; _ }
+      ; type_ = { node = type_; _ }
+      ; attrs
+      } = field in
 
   let field = lazy begin
     let entries_set = Ir_xform_dupes.create "field attribute" in
@@ -98,12 +103,12 @@ and xform_field defs t parent field =
         ; length = None
         } in
     let field = ref @@ Model.Field !field_ in
-    FieldHash.set t.fields (!parent.name, name) field;
+    FieldHash.set t.fields ~key:(!parent.name, name) ~data:field;
 
     List.iter attrs ~f:(
       fun { Annotate.loc; node } ->
         begin match node with
-          | Syntax.Field.Column { node = col } ->
+          | Syntax.Field.Column { node = col; _ } ->
             Ir_xform_dupes.check entries_set "column" loc;
             field_ := { !field_ with column = Some col }
 
@@ -141,7 +146,12 @@ and xform_field defs t parent field =
   | None -> force field
 
 and xform_rel defs t parent rel =
-  let { Syntax.Rel.name = { node = name }; model; field; kind = { node = kind }; attrs } = rel in
+  let { Syntax.Rel.name = { node = name; _ }
+      ; model
+      ; field
+      ; kind = { node = kind; _ }
+      ; attrs
+      } = rel in
 
   let rel = lazy begin
     let entries_set = Ir_xform_dupes.create "relation attribute" in
@@ -159,12 +169,12 @@ and xform_rel defs t parent rel =
         ; updatable = false
         } in
     let rel = ref @@ Model.Rel !rel_ in
-    FieldHash.set t.fields (!parent.name, name) rel;
+    FieldHash.set t.fields ~key:(!parent.name, name) ~data:rel;
 
     List.iter attrs ~f:(
       fun { Annotate.loc; node } ->
         begin match node with
-          | Syntax.Rel.Column { node = col } ->
+          | Syntax.Rel.Column { node = col; _ } ->
             Ir_xform_dupes.check entries_set "column" loc;
             rel_ := { !rel_ with column = Some col }
 
@@ -188,7 +198,10 @@ and xform_rel defs t parent rel =
   | None -> force rel
 
 and xform_crud defs t crud =
-  let { Syntax.Crud.model; entries } = crud in
+  let { Syntax.Crud.model
+      ; entries
+      } = crud in
+
   let model = find_and_xform_model defs t model in
 
   let crud = lazy begin
@@ -196,13 +209,13 @@ and xform_crud defs t crud =
         { Crud.model
         ; entries = []
         } in
-    StringHash.set t.cruds !model.name crud;
+    StringHash.set t.cruds ~key:!model.name ~data:crud;
 
     List.iter entries ~f:(
-      fun { Annotate.loc; node } ->
+      fun { Annotate.node; _ } ->
         match node with
         | Syntax.Crud.Create create ->
-          let create = xform_create defs t crud create in
+          let create = xform_create crud create in
           crud := { !crud with entries = create :: !crud.entries }
 
         | Read read ->
@@ -228,21 +241,22 @@ and xform_crud defs t crud =
 and xform_query defs t model = function
   | Syntax.Query.Term term -> xform_query_term defs t model term
 
-  | And { left_query = { node = left_query }; right_query = { node = right_query } } ->
+  | And { left_query = { node = left_query; _ }; right_query = { node = right_query; _ } } ->
     Query.And { b_left = xform_query defs t model left_query
               ; b_right = xform_query defs t model right_query
               }
 
-  | Or { left_query = { node = left_query }; right_query = { node = right_query } } ->
+  | Or { left_query = { node = left_query; _ }; right_query = { node = right_query; _ } } ->
     Query.Or { b_left = xform_query defs t model left_query
              ; b_right = xform_query defs t model right_query
              }
 
 and xform_query_term defs t model term =
-  let { Syntax.Query.left_val = { node = left_val }
-      ; op = { node = op }
-      ; right_val = { node = right_val }
+  let { Syntax.Query.left_val = { node = left_val; _ }
+      ; op = { node = op; _ }
+      ; right_val = { node = right_val; _ }
       } = term in
+
   let left_val = xform_query_value defs t model left_val in
   let right_val = xform_query_value defs t model right_val in
   Query.Term { t_left = left_val
@@ -254,23 +268,24 @@ and xform_query_value defs t model = function
   | Syntax.Query.Placeholder ->
     Query.Placeholder
 
-  | Literal { node = literal } ->
+  | Literal { node = literal; _ } ->
     Literal literal
 
-  | Call ({ node = fn }, { node = value }) ->
+  | Call ({ node = fn; _ }, { node = value; _ }) ->
     Call (fn, xform_query_value defs t model value)
 
   | Field field ->
     let field = find_and_xform_field defs t model field in
     Field field
 
-  | Join (model, { node = query }, field) ->
+  | Join (model, { node = query; _ }, field) ->
     let model = find_and_xform_model defs t model in
     let field = find_and_xform_field defs t model field in
     Join (model, xform_query defs t model query, field)
 
-and xform_create defs t parent create =
+and xform_create parent create =
   let { Syntax.Create.attrs } = create in
+
   let attrs_set = Ir_xform_dupes.create "attribute" in
 
   let create = ref { Create.parent
@@ -285,7 +300,7 @@ and xform_create defs t parent create =
         Ir_xform_dupes.check attrs_set "raw" loc;
         create := { !create with raw = true }
 
-      | Suffix { node = suffix } ->
+      | Suffix { node = suffix; _ } ->
         Ir_xform_dupes.check attrs_set "suffix" loc;
         create := { !create with suffix = Some suffix }
   );
@@ -293,7 +308,11 @@ and xform_create defs t parent create =
   Crud.Create !create
 
 and xform_read defs t parent read =
-  let { Syntax.Read.kind = { node = kind }; query; attrs } = read in
+  let { Syntax.Read.kind = { node = kind; _ }
+      ; query
+      ; attrs
+      } = read in
+
   let attrs_set = Ir_xform_dupes.create "attribute" in
   let query = Option.map query ~f:(
       fun query -> xform_query defs t !parent.model query.node
@@ -309,7 +328,7 @@ and xform_read defs t parent read =
   List.iter attrs ~f:(
     fun { Annotate.loc; node } ->
       match node with
-      | Syntax.Read.Suffix { node = suffix } ->
+      | Syntax.Read.Suffix { node = suffix; _ } ->
         Ir_xform_dupes.check attrs_set "suffix" loc;
         read := { !read with suffix = Some suffix }
 
@@ -321,7 +340,10 @@ and xform_read defs t parent read =
   Crud.Read !read
 
 and xform_update defs t parent update =
-  let { Syntax.Update.attrs; query = { node = query } } = update in
+  let { Syntax.Update.attrs
+      ; query = { node = query; _ }
+      } = update in
+
   let attrs_set = Ir_xform_dupes.create "attribute" in
   let query = xform_query defs t !parent.model query in
 
@@ -333,7 +355,7 @@ and xform_update defs t parent update =
   List.iter attrs ~f:(
     fun { Annotate.loc; node } ->
       match node with
-      | Syntax.Update.Suffix { node = suffix } ->
+      | Syntax.Update.Suffix { node = suffix; _ } ->
         Ir_xform_dupes.check attrs_set "suffix" loc;
         update := { !update with suffix = Some suffix }
   );
@@ -341,7 +363,10 @@ and xform_update defs t parent update =
   Crud.Update !update
 
 and xform_delete defs t parent delete =
-  let { Syntax.Delete.attrs; query = { node = query } } = delete in
+  let { Syntax.Delete.attrs
+      ; query = { node = query; _ }
+      } = delete in
+
   let attrs_set = Ir_xform_dupes.create "attribute" in
   let query = xform_query defs t !parent.model query in
 
@@ -353,15 +378,14 @@ and xform_delete defs t parent delete =
   List.iter attrs ~f:(
     fun { Annotate.loc; node } ->
       match node with
-      | Syntax.Delete.Suffix { node = suffix } ->
+      | Syntax.Delete.Suffix { node = suffix; _ } ->
         Ir_xform_dupes.check attrs_set "suffix" loc;
         delete := { !delete with suffix = Some suffix }
   );
 
   Crud.Delete !delete
 
-
-let xform_def defs t { Annotate.node = def } =
+let xform_def defs t { Annotate.node = def; _ } =
   match def with
   | Syntax.Model model -> ignore @@ xform_model defs t model
   | Syntax.Crud crud -> ignore @@ xform_crud defs t crud

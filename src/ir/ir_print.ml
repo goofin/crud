@@ -1,5 +1,4 @@
 open Core
-open Crud_ast
 open Ir_xform_hashes
 
 let dprintf ?(depth=0) =
@@ -13,8 +12,8 @@ let print_field ?(depth=0) (field : Ir_xform_transform.Model.field ref)  =
 
   | Rel rel ->
     let field_name = match !(rel.field) with
-      | Field {name} -> name
-      | Rel {name} -> name
+      | Field {name; _} -> name
+      | Rel {name; _} -> name
     in
     dprintf ~depth "rel: %s.%s\n" !(rel.parent).name rel.name;
     dprintf ~depth:(depth+1) "model: %s\n" !(rel.model).name;
@@ -36,5 +35,7 @@ let print_model ?(depth=0) (model : Ir_xform_transform.Model.t ref) =
       List.iter index ~f:(print_field ~depth:(depth+2))
   )
 
-let print {Ir_xform_transform.models; fields} =
-  StringHash.iter models ~f:print_model
+let print {Ir_xform_transform.models; fields; cruds} =
+  StringHash.iter models ~f:print_model;
+  ignore fields;
+  ignore cruds

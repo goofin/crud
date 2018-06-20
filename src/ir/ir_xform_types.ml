@@ -117,6 +117,38 @@ and Crud : sig
     }
 end = Crud
 
+module QueryTypes = struct
+  type type_ =
+    | Any
+    | Integer
+    | Float
+    | String
+    | DateTime
+    | Fixed of Syntax.Field.type_
+
+  let type_of_value (value : Query.value) =
+    let rec field_type (field : Model.field ref) =
+      match !field with
+      | Field field -> field.type_
+      | Rel rel -> field_type rel.field
+    in
+
+    match value with
+    | Placeholder -> Any
+    | Field field ->  Fixed (field_type field)
+    | Join (_, _, field) ->  Fixed (field_type field)
+    | Literal literal ->
+      begin match Int.of_string literal with
+        | _ -> Integer
+        | exception _ -> String
+      end
+    | Call (fn, _) ->
+      begin match fn with
+        | "lower" -> String
+        | _ -> Any
+      end
+end
+
 type t =
   { models: Model.t ref StringHash.t
   ; fields: Model.field ref FieldHash.t

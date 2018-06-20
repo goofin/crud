@@ -13,6 +13,7 @@ let location
     { Lexing.pos_lnum = end_line
     ; pos_cnum = end_cnum
     ; pos_bol = end_bol
+    ; _
     }
   =
   { Ast_annotate.file = file
@@ -38,7 +39,7 @@ let print  = function
       | Some message -> print_endline message
     end
 
-  | Lexing (invalid_input, err_pos) ->
+  | Lexing (_, err_pos) ->
     let loc = location err_pos err_pos in
     let loc = { loc with start_pos = loc.start_pos - 1 } in
     printf "File %s, line %d, lexing error:\n" loc.file loc.start_line;
