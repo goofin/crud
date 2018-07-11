@@ -55,8 +55,6 @@ rule token = parse
     | ','     { needs_comma := false; emit COMMA }
     | '('     { needs_comma := false; emit LEFT_PAREN }
     | ')'     { needs_comma := true;  emit RIGHT_PAREN }
-    | '['     { needs_comma := true;  emit LEFT_BRACKET }
-    | ']'     { needs_comma := true;  emit RIGHT_BRACKET }
     | '.'     { needs_comma := true;  emit DOT }
     | '?'     { needs_comma := true;  emit QUESTION }
     | "!="    { needs_comma := true;  emit NOT_EQUAL }
@@ -122,7 +120,6 @@ rule token = parse
     | "orderby"  { needs_comma := true;  emit ORDERBY }
     | "asc"      { needs_comma := true;  emit ASC }
     | "desc"     { needs_comma := true;  emit DESC }
-    | "noreturn" { needs_comma := true;  emit NORETURN }
     | "and"      { needs_comma := false; emit AND }
     | "or"       { needs_comma := false; emit OR }
 

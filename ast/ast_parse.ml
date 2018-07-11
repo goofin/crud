@@ -14,12 +14,14 @@ let parse parse_fun lexbuf =
   let failure = function
     | Interp.HandlingError env ->
       let (start_pos, end_pos) = Interp.positions env in
-      let num = Interp.current_state_number env in
-      let message =
-        try Some (Ast_parser_messages.message num)
-        with | _ -> None
-      in
-      Core.Error (Ast_error.Parsing (message, start_pos, end_pos))
+      (* remove this until we actually care about messages
+         let num = Interp.current_state_number env in
+         let message =
+         try Some (Ast_parser_messages.message num)
+         with | _ -> None
+         in
+      *)
+      Core.Error (Ast_error.Parsing (None, start_pos, end_pos))
     | _ -> assert false
   in
   try Interp.loop_handle success failure input (parse_fun lexbuf.Lexing.lex_curr_p)

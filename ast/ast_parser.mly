@@ -2,8 +2,6 @@
 %token COMMA
 %token LEFT_PAREN
 %token RIGHT_PAREN
-%token LEFT_BRACKET
-%token RIGHT_BRACKET
 %token DOT
 %token QUESTION
 %token NOT_EQUAL
@@ -66,7 +64,6 @@
 %token PAGED
 %token SUFFIX
 %token RAW
-%token NORETURN
 %token ORDERBY
 %token ASC
 %token DESC
@@ -104,23 +101,32 @@ let annotate start_pos end_pos node =
 ///////////////////////////////////////////////////////////////////////////////
 
 //
+// avoid the standard library. it makes a stupid warning.
+//
+
+option_(X):
+    | { None }
+    | x = X { Some x }
+    ;
+
+list_(X):
+    | { [] }
+    | x = X; xs = list_(X) { x :: xs }
+    ;
+
+//
 // support for left recursive list that allows optional trailing delimiter
 //
 
 rev_nonempty_sep_list(DELIM, X):
-  | x = X { [ x ] }
-  | xs = rev_nonempty_sep_list(DELIM, X); DELIM; x = X { x :: xs }
-  ;
-
-%inline
-rev_sep_list(DELIM, X):
-    | { [] }
-    | xs = rev_nonempty_sep_list(DELIM, X) { xs }
+    | x = X { [ x ] }
+    | xs = rev_nonempty_sep_list(DELIM, X); DELIM; x = X { x :: xs }
     ;
 
-%inline
 sep_list(DELIM, X):
-  xs = rev_sep_list(DELIM, X) DELIM? { List.rev xs }
+    | { [] }
+    | xs = rev_nonempty_sep_list(DELIM, X) option_(DELIM) { List.rev xs }
+    ;
 
 //
 // annotation helpers
@@ -147,7 +153,7 @@ annotated_string:
 
 parse_bare_or_list(X):
     | LEFT_PAREN entries = sep_list(COMMA, X) RIGHT_PAREN { entries }
-    | entries = list(X)                                   { entries }
+    | entries = list_(X)                                  { entries }
     ;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -403,7 +409,6 @@ parse_crud_read_attr_orderby:
     { annotate $startpos $endpos (Ast_syntax.Read.OrderBy direction) }
     ;
 
-%inline
 parse_crud_read_attr_orderby_direction:
     | ASC  { Ast_syntax.Read.Ascending }
     | DESC { Ast_syntax.Read.Descending }
