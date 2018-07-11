@@ -1,8 +1,0 @@
-(jbuild_version 1)
-
-(library (
-    (name crud_ir)
-    (synopsis "Definitions and transformations to an IR form")
-    (libraries (core crud_ast))
-    (preprocess (pps (ppx_jane)))
-))

@@ -1,0 +1,26 @@
+(ocamllex
+    (modules ast_lexer)
+)
+
+(menhir
+    (modules ast_parser)
+    (flags --unused-tokens --table --explain)
+)
+
+;; run the stuff to make the messages module
+(rule
+    (targets ast_parser_messages.ml)
+    (deps ast_parser.messages ast_parser.mly)
+    (action
+        (with-stdout-to ast_parser_messages.ml
+            (run menhir --unused-tokens --compile-errors ast_parser.messages ast_parser.mly))
+    )
+)
+
+
+(library
+    (name crud_ast)
+    (synopsis "AST definition and parsing for crud")
+    (libraries core menhirLib)
+    (preprocess (pps ppx_jane))
+)

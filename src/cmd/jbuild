@@ -1,7 +1,0 @@
-(jbuild_version 1)
-
-(executable (
-    (name test)
-    (libraries (core crud_ast crud_ir))
-    (preprocess (pps (ppx_jane)))
-))
