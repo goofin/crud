@@ -1,5 +1,5 @@
-open Core
-open Ir_xform_hashes
+open Base
+open Stdio
 
 let dprintf ?(depth=0) =
   printf "%s" @@ String.make depth '\t';
@@ -21,7 +21,7 @@ let print_field ?(depth=0) (field : Ir_xform_transform.Model.field ref)  =
 
 let print_model ?(depth=0) (model : Ir_xform_transform.Model.t ref) =
   dprintf ~depth "model: %s\n" !model.name;
-  StringHash.iter !model.fields ~f:(print_field ~depth:(depth+1));
+  Hashtbl.iter !model.fields ~f:(print_field ~depth:(depth+1));
   dprintf ~depth:(depth+1) "key:\n";
   List.iter !model.key ~f:(print_field ~depth:(depth+2));
   List.iter !model.unique ~f:(
@@ -36,6 +36,6 @@ let print_model ?(depth=0) (model : Ir_xform_transform.Model.t ref) =
   )
 
 let print {Ir_xform_transform.models; fields; cruds} =
-  StringHash.iter models ~f:print_model;
+  Hashtbl.iter models ~f:print_model;
   ignore fields;
   ignore cruds

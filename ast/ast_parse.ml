@@ -1,4 +1,5 @@
-open Core
+open Base
+open Stdio
 
 type parser = Lexing.position ->
   Ast_syntax.definition Ast_annotate.t list Ast_parser.MenhirInterpreter.checkpoint
@@ -21,11 +22,11 @@ let parse parse_fun lexbuf =
          with | _ -> None
          in
       *)
-      Core.Error (Ast_error.Parsing (None, start_pos, end_pos))
+      Error (Ast_error.Parsing (None, start_pos, end_pos))
     | _ -> assert false
   in
   try Interp.loop_handle success failure input (parse_fun lexbuf.Lexing.lex_curr_p)
-  with | Ast_lexer.Error (input, pos) -> Core.Error (Lexing (input, pos))
+  with | Ast_lexer.Error (input, pos) -> Error (Lexing (input, pos))
 
 let parse_string parse_fun str =
   parse parse_fun @@ Lexing.from_string str

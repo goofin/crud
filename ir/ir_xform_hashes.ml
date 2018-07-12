@@ -1,8 +1,6 @@
-open Core
+open Base
 
-module StringHash = Hashtbl.Make(String)
-
-module FieldHash = Hashtbl.Make(struct
-    type t = (string * string)
-    [@@deriving (sexp, hash, compare)]
-  end)
+module Fields = struct
+  type t = (string * string)
+  [@@deriving (sexp, hash, compare)]
+end

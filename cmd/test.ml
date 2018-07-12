@@ -1,6 +1,6 @@
-open Core
+open Base
 
-let loop filename () =
+let handle filename =
   match Crud_ast.parse_file filename with
   | Error err -> Crud_ast.Error.print err
   | Ok defs ->
@@ -9,15 +9,4 @@ let loop filename () =
     | Error err -> Crud_ir.Error.print err
     | Ok defs -> Crud_ir.print defs
 
-let command =
-  Command.basic
-    ~summary:"Does dbx stuff"
-    Command.Let_syntax.(
-      let%map_open
-        filename = anon ("filename" %: string)
-      in
-      loop filename
-    )
-
-let () =
-  Command.run command
+let () = handle Sys.argv.(1)

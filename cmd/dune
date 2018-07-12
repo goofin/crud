@@ -1,5 +1,5 @@
 (executable
     (name test)
-    (libraries core crud_ast crud_ir)
+    (libraries base crud_ast crud_ir)
     (preprocess (pps ppx_jane))
 )

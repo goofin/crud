@@ -1,4 +1,5 @@
-open Core
+open Base
+open Stdio
 
 type t =
   | Lexing of string * Lexing.position
@@ -28,9 +29,9 @@ let print  = function
     let loc = location start_pos end_pos in
     let lines =
       if loc.start_line = loc.end_line then
-        sprintf "line %d" loc.start_line
+        Printf.sprintf "line %d" loc.start_line
       else
-        sprintf "lines %d-%d" loc.start_line loc.end_line
+        Printf.sprintf "lines %d-%d" loc.start_line loc.end_line
     in
     printf "File %s, %s, parsing error:\n%!" loc.file lines;
     Ast_annotate.print_location ~context:2 ~highlight:true loc;

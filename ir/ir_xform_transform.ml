@@ -1,16 +1,16 @@
-open Core
+open Base
 open Crud_ast
 open Ir_xform_hashes
 
 include Ir_xform_types
 
 let check_duplicate_strings strings =
-  let seen = StringHash.create () in
+  let seen = Hashtbl.create (module String) in
   List.iter strings ~f:(
     fun { Annotate.node = node; loc } ->
-      match StringHash.find seen node with
+      match Hashtbl.find seen node with
       | Some prev_loc -> raise @@ Ir_error.Exn (Duplicate ("value", prev_loc, loc))
-      | None -> StringHash.set seen ~key:node ~data:loc
+      | None -> Hashtbl.set seen ~key:node ~data:loc
   )
 
 let rec find_and_xform_field defs t model field =
@@ -32,14 +32,14 @@ and xform_model defs t model =
 
     let model = ref
         { Model.name = name
-        ; fields = StringHash.create ()
+        ; fields = Hashtbl.create (module String)
         ; table = None
         ; key = []
         ; unique = []
         ; index = []
         ; cruds = []
         } in
-    StringHash.set t.models ~key:name ~data:model;
+    Hashtbl.set t.models ~key:name ~data:model;
 
     List.iter entries ~f:(
       fun { Annotate.loc; node } ->
@@ -67,18 +67,18 @@ and xform_model defs t model =
         | Field ({ name = { node = field_name; _ }; _ } as field) ->
           Ir_xform_dupes.check fields_set field_name loc;
           let field = xform_field t model field in
-          StringHash.set !model.fields ~key:field_name ~data:field
+          Hashtbl.set !model.fields ~key:field_name ~data:field
 
         | Rel ({ name = { node = rel_name; _ }; _ } as rel) ->
           Ir_xform_dupes.check fields_set rel_name loc;
           let rel = xform_rel defs t model rel in
-          StringHash.set !model.fields ~key:rel_name ~data:rel
+          Hashtbl.set !model.fields ~key:rel_name ~data:rel
     );
 
     model
   end in
 
-  match StringHash.find t.models name with
+  match Hashtbl.find t.models name with
   | Some model -> model
   | None -> force model
 
@@ -103,7 +103,7 @@ and xform_field t parent field =
         ; length = None
         } in
     let field = ref @@ Model.Field !field_ in
-    FieldHash.set t.fields ~key:(!parent.name, name) ~data:field;
+    Hashtbl.set t.fields ~key:(!parent.name, name) ~data:field;
 
     List.iter attrs ~f:(
       fun { Annotate.loc; node } ->
@@ -141,7 +141,7 @@ and xform_field t parent field =
     field
   end in
 
-  match FieldHash.find t.fields (!parent.name, name) with
+  match Hashtbl.find t.fields (!parent.name, name) with
   | Some field -> field
   | None -> force field
 
@@ -169,7 +169,7 @@ and xform_rel defs t parent rel =
         ; updatable = false
         } in
     let rel = ref @@ Model.Rel !rel_ in
-    FieldHash.set t.fields ~key:(!parent.name, name) ~data:rel;
+    Hashtbl.set t.fields ~key:(!parent.name, name) ~data:rel;
 
     List.iter attrs ~f:(
       fun { Annotate.loc; node } ->
@@ -193,7 +193,7 @@ and xform_rel defs t parent rel =
     rel
   end in
 
-  match FieldHash.find t.fields (!parent.name, name) with
+  match Hashtbl.find t.fields (!parent.name, name) with
   | Some rel -> rel
   | None -> force rel
 
@@ -209,7 +209,7 @@ and xform_crud defs t crud =
         { Crud.model
         ; entries = []
         } in
-    StringHash.set t.cruds ~key:!model.name ~data:crud;
+    Hashtbl.set t.cruds ~key:!model.name ~data:crud;
 
     List.iter entries ~f:(
       fun { Annotate.node; _ } ->
@@ -234,7 +234,7 @@ and xform_crud defs t crud =
     crud
   end in
 
-  match StringHash.find t.cruds !model.name with
+  match Hashtbl.find t.cruds !model.name with
   | Some crud -> crud
   | None -> force crud
 
@@ -392,9 +392,9 @@ let xform_def defs t { Annotate.node = def; _ } =
 
 let xform_defs defs =
   let t =
-    { models = StringHash.create ()
-    ; fields = FieldHash.create ()
-    ; cruds = StringHash.create ()
+    { models = Hashtbl.create (module String)
+    ; fields = Hashtbl.create (module Fields)
+    ; cruds = Hashtbl.create (module String)
     } in
 
   match List.iter defs ~f:(xform_def (Ir_xform_defs.create defs) t) with

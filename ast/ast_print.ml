@@ -1,4 +1,5 @@
-open Core
+open Base
+open Stdio
 
 let print_annotated ?(depth=0) header (annotated : 't Ast_annotate.t) =
   let prefix = String.make depth '\t' in
@@ -87,13 +88,13 @@ module Query = struct
 
   and print ?(depth=0) =
     function
-    | Term term -> 
+    | Term term ->
       print_annotated ~depth "left_val" term.left_val;
       print_value ~depth:(depth+1) term.left_val.node;
       print_annotated ~depth "op" term.op;
       print_annotated ~depth "right_val" term.right_val;
       print_value ~depth:(depth+1) term.right_val.node
-    | And and_ -> 
+    | And and_ ->
       print_annotated ~depth "left_query" and_.left_query;
       print ~depth:(depth+1) and_.left_query.node;
       print_annotated ~depth "right_query" and_.right_query;

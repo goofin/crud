@@ -1,5 +1,5 @@
 {
-open Core
+open Base
 open Ast_parser
 
 exception Error of string * Lexing.position

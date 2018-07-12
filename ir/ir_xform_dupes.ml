@@ -1,12 +1,11 @@
-open Core
+open Base
 open Crud_ast
-open Ir_xform_hashes
 
-type t = string * Annotate.location StringHash.t
+type t = string * (string, Annotate.location) Hashtbl.t
 
-let create kind = (kind, StringHash.create ())
+let create kind = (kind, Hashtbl.create (module String))
 
 let check (kind, hash) key loc =
-  match StringHash.find hash key with
+  match Hashtbl.find hash key with
   | Some prev_loc -> raise (Ir_error.Exn (Duplicate (kind, prev_loc, loc)))
-  | None -> StringHash.set hash ~key:key ~data:loc
+  | None -> Hashtbl.set hash ~key:key ~data:loc

@@ -1,6 +1,5 @@
-open Core
+open Base
 open Crud_ast
-open Ir_xform_hashes
 
 module rec Field : sig
   type t =
@@ -36,7 +35,7 @@ and Model : sig
 
   type t =
     { name: string
-    ; fields: field ref StringHash.t
+    ; fields: (string, field ref) Hashtbl.t
     ; table: string option
     ; key: field ref list
     ; unique: field ref list list
@@ -150,7 +149,7 @@ module QueryTypes = struct
 end
 
 type t =
-  { models: Model.t ref StringHash.t
-  ; fields: Model.field ref FieldHash.t
-  ; cruds: Crud.t ref StringHash.t
+  { models: (string, Model.t ref) Hashtbl.t
+  ; fields: (string * string, Model.field ref) Hashtbl.t
+  ; cruds: (string, Crud.t ref) Hashtbl.t
   }
